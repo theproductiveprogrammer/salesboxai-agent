@@ -122,7 +122,7 @@ export function UnipileAccountIdInput() {
       <Button
         onClick={handleConnect}
         disabled={isConnecting}
-        variant="outline"
+        variant="default"
         className="w-full justify-center gap-2"
       >
         <Linkedin size={18} />
