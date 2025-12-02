@@ -61,8 +61,6 @@ jobs:
     outputs:
       WIN_SIG: ${{ steps.metadata.outputs.WIN_SIG }}
       FILE_NAME: ${{ steps.metadata.outputs.FILE_NAME }}
-    permissions:
-      contents: write
     steps:
       - name: Getting the repo
         uses: actions/checkout@v3

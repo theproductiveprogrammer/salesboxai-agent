@@ -4,6 +4,9 @@ on:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+"]
 
+permissions:
+  contents: write
+
 jobs:
   # Job create Update app version based on latest release tag with build number and save to output
   get-update-version:
@@ -15,8 +18,6 @@ jobs:
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       version: ${{ steps.get_version.outputs.version }}
-    permissions:
-      contents: write
     steps:
       - name: Extract tag name without v prefix
         id: get_version
@@ -70,8 +71,6 @@ jobs:
   sync-temp-to-latest:
     needs: [create-draft-release, get-update-version, build-macos, build-windows-x64, build-linux-x64]
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
       - name: Getting the repo
         uses: actions/checkout@v3

@@ -67,8 +67,6 @@ jobs:
       FILE_NAME: ${{ steps.metadata.outputs.FILE_NAME }}
       DMG_NAME: ${{ steps.metadata.outputs.DMG_NAME }}
       TAR_NAME: ${{ steps.metadata.outputs.TAR_NAME }}
-    permissions:
-      contents: write
     steps:
       - name: Getting the repo
         uses: actions/checkout@v3
