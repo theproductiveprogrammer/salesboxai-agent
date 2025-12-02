@@ -156,27 +156,11 @@ jobs:
           echo "---------nsis.template---------"
           cat ./src-tauri/tauri.bundle.windows.nsis.template
 
-      - name: Install AzureSignTool
-        run: |
-          dotnet tool install --global --version 6.0.0 AzureSignTool
-
       - name: Build app
         shell: bash
         run: |
           make build
         env:
-          AZURE_KEY_VAULT_URI: ${{ secrets.AZURE_KEY_VAULT_URI }}
-          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-          AZURE_CERT_NAME: ${{ secrets.AZURE_CERT_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.DELTA_AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.DELTA_AWS_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-          AWS_EC2_METADATA_DISABLED: 'true'
-          AWS_MAX_ATTEMPTS: '5'
-          POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
-          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
@@ -194,10 +178,10 @@ jobs:
           cd ./src-tauri/target/release/bundle/nsis
           if [ "${{ inputs.channel }}" != "stable" ]; then
             FILE_NAME=SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe
-            WIN_SIG=$(cat SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe.sig)
+            WIN_SIG=$(cat SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
           else
             FILE_NAME=SalesboxAIAgent_${{ inputs.new_version }}_x64-setup.exe
-            WIN_SIG=$(cat SalesboxAIAgent_${{ inputs.new_version }}_x64-setup.exe.sig)
+            WIN_SIG=$(cat SalesboxAIAgent_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
           fi
 
           echo "::set-output name=WIN_SIG::$WIN_SIG"

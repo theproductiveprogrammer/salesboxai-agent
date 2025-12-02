@@ -133,21 +133,24 @@ jobs:
       - name: Build app
         run: |
           make build
+        env:
+          RELEASE_CHANNEL: '${{ inputs.channel }}'
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          AUTO_UPDATER_DISABLED: ${{ inputs.disable_updater && 'true' || 'false' }}
 
+      - name: Sign AppImage for updater
+        if: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY != '' }}
+        run: |
           APP_IMAGE=./src-tauri/target/release/bundle/appimage/$(ls ./src-tauri/target/release/bundle/appimage/ | grep AppImage | head -1)
           yarn tauri signer sign \
           --private-key "$TAURI_SIGNING_PRIVATE_KEY" \
           --password "$TAURI_SIGNING_PRIVATE_KEY_PASSWORD" \
           "$APP_IMAGE"
-
         env:
-          RELEASE_CHANNEL: '${{ inputs.channel }}'
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
-          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          AUTO_UPDATER_DISABLED: ${{ inputs.disable_updater && 'true' || 'false' }}
       # Publish app
 
       ## Artifacts, for dev and test
@@ -174,13 +177,13 @@ jobs:
           if [ "${{ inputs.channel }}" != "stable" ]; then
             DEB_FILE_NAME=SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb
             APPIMAGE_FILE_NAME=SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage
-            DEB_SIG=$(cat deb/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig)
-            APPIMAGE_SIG=$(cat appimage/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig)
+            DEB_SIG=$(cat deb/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig 2>/dev/null || echo "")
+            APPIMAGE_SIG=$(cat appimage/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig 2>/dev/null || echo "")
           else
             DEB_FILE_NAME=SalesboxAIAgent_${{ inputs.new_version }}_amd64.deb
             APPIMAGE_FILE_NAME=SalesboxAIAgent_${{ inputs.new_version }}_amd64.AppImage
-            DEB_SIG=$(cat deb/SalesboxAIAgent_${{ inputs.new_version }}_amd64.deb.sig)
-            APPIMAGE_SIG=$(cat appimage/SalesboxAIAgent_${{ inputs.new_version }}_amd64.AppImage.sig)
+            DEB_SIG=$(cat deb/SalesboxAIAgent_${{ inputs.new_version }}_amd64.deb.sig 2>/dev/null || echo "")
+            APPIMAGE_SIG=$(cat appimage/SalesboxAIAgent_${{ inputs.new_version }}_amd64.AppImage.sig 2>/dev/null || echo "")
           fi
 
           echo "DEB_SIG=$DEB_SIG" >> $GITHUB_OUTPUT
