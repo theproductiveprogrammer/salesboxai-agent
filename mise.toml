@@ -233,3 +233,86 @@ depends = ["test"]
 description = "Run CI pipeline (lint + test in parallel)"
 depends = ["qa-parallel"]
 alias = "ci-fast"
+
+# ============================================================================
+# RELEASE TASKS
+# ============================================================================
+
+[tasks.release]
+description = "Create a release tag and push to trigger CI builds (Windows, macOS, Linux)"
+run = '''
+#!/usr/bin/env bash
+set -e
+
+# Get current version from tauri.conf.json
+CURRENT_VERSION=$(grep -o '"version": "[^"]*"' src-tauri/tauri.conf.json | head -1 | cut -d'"' -f4)
+
+echo "============================================"
+echo "  Release Helper"
+echo "============================================"
+echo ""
+echo "Current version: v$CURRENT_VERSION"
+echo ""
+
+# Check if tag already exists
+if git rev-parse "v$CURRENT_VERSION" >/dev/null 2>&1; then
+  echo "⚠️  Tag v$CURRENT_VERSION already exists!"
+  echo ""
+  echo "To release a new version:"
+  echo "  1. Update version: mise run set-version <new-version>"
+  echo "  2. Commit changes: git add -A && git commit -m \"Bump version to <new-version>\""
+  echo "  3. Run release:    mise run release"
+  echo ""
+  exit 1
+fi
+
+# Check for uncommitted changes
+if ! git diff-index --quiet HEAD -- 2>/dev/null; then
+  echo "⚠️  You have uncommitted changes!"
+  echo ""
+  git status --short
+  echo ""
+  read -p "Commit all changes before releasing? (y/n) " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    git add -A
+    git commit -m "Prepare release v$CURRENT_VERSION"
+  else
+    echo "Please commit your changes first."
+    exit 1
+  fi
+fi
+
+echo "This will:"
+echo "  1. Create tag: v$CURRENT_VERSION"
+echo "  2. Push tag to origin"
+echo "  3. Trigger GitHub Actions to build for:"
+echo "     - Windows (x64)"
+echo "     - macOS (Universal)"
+echo "     - Linux (x64)"
+echo ""
+read -p "Proceed with release v$CURRENT_VERSION? (y/n) " -n 1 -r
+echo
+
+if [[ $REPLY =~ ^[Yy]$ ]]; then
+  echo ""
+  echo "Creating tag v$CURRENT_VERSION..."
+  git tag "v$CURRENT_VERSION"
+
+  echo "Pushing tag to origin..."
+  git push origin "v$CURRENT_VERSION"
+
+  echo ""
+  echo "============================================"
+  echo "  ✓ Release v$CURRENT_VERSION initiated!"
+  echo "============================================"
+  echo ""
+  echo "Next steps:"
+  echo "  1. Check build progress at GitHub Actions"
+  echo "  2. Once complete, review draft release"
+  echo "  3. Publish the release"
+  echo ""
+else
+  echo "Release cancelled."
+fi
+'''

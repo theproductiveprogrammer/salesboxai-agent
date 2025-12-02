@@ -111,7 +111,7 @@ jobs:
           mv /tmp/tauri.conf.json ./src-tauri/tauri.conf.json         
           if [ "${{ inputs.channel }}" != "stable" ]; then
             jq '.bundle.linux.deb.files = {"usr/bin/bun": "resources/bin/bun",
-                                           "usr/lib/Jan-${{ inputs.channel }}/resources/lib/libvulkan.so": "resources/lib/libvulkan.so"}' ./src-tauri/tauri.linux.conf.json > /tmp/tauri.linux.conf.json
+                                           "usr/lib/SalesboxAIAgent-${{ inputs.channel }}/resources/lib/libvulkan.so": "resources/lib/libvulkan.so"}' ./src-tauri/tauri.linux.conf.json > /tmp/tauri.linux.conf.json
             mv /tmp/tauri.linux.conf.json ./src-tauri/tauri.linux.conf.json
           fi
           jq --arg version "${{ inputs.new_version }}" '.version = $version' web-app/package.json > /tmp/package.json
@@ -126,23 +126,11 @@ jobs:
 
           # Change app name for beta and nightly builds
           if [ "${{ inputs.channel }}" != "stable" ]; then
-            jq '.plugins.updater.endpoints = ["https://delta.jan.ai/${{ inputs.channel }}/latest.json"]' ./src-tauri/tauri.conf.json > /tmp/tauri.conf.json
-            mv /tmp/tauri.conf.json ./src-tauri/tauri.conf.json
-
-            chmod +x .github/scripts/rename-tauri-app.sh
-            .github/scripts/rename-tauri-app.sh ./src-tauri/tauri.conf.json ${{ inputs.channel }}
-
-            cat ./src-tauri/tauri.conf.json
-            
-            # Update Cargo.toml
-            ctoml ./src-tauri/Cargo.toml package.name "Jan-${{ inputs.channel }}"
+            # Update Cargo.toml for non-stable builds
+            ctoml ./src-tauri/Cargo.toml package.name "SalesboxAIAgent-${{ inputs.channel }}"
             ctoml ./src-tauri/Cargo.toml dependencies.tauri.features[] "devtools"
             echo "------------------"
             cat ./src-tauri/Cargo.toml
-
-            chmod +x .github/scripts/rename-workspace.sh
-            .github/scripts/rename-workspace.sh ./package.json ${{ inputs.channel }}
-            cat ./package.json
           fi
       - name: Build app
         run: |
@@ -169,14 +157,14 @@ jobs:
         if: inputs.public_provider != 'github'
         uses: actions/upload-artifact@v4
         with:
-          name: jan-linux-amd64-${{ inputs.new_version }}-deb
+          name: salesboxai-agent-linux-amd64-${{ inputs.new_version }}-deb
           path: ./src-tauri/target/release/bundle/deb/*.deb
 
       - name: Upload Artifact
         if: inputs.public_provider != 'github'
         uses: actions/upload-artifact@v4
         with:
-          name: jan-linux-amd64-${{ inputs.new_version }}-AppImage
+          name: salesboxai-agent-linux-amd64-${{ inputs.new_version }}-AppImage
           path: ./src-tauri/target/release/bundle/appimage/*.AppImage
 
       ## Set output filename for linux
@@ -186,15 +174,15 @@ jobs:
           cd ./src-tauri/target/release/bundle
 
           if [ "${{ inputs.channel }}" != "stable" ]; then
-            DEB_FILE_NAME=Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb
-            APPIMAGE_FILE_NAME=Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage
-            DEB_SIG=$(cat deb/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig)
-            APPIMAGE_SIG=$(cat appimage/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig)
+            DEB_FILE_NAME=SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb
+            APPIMAGE_FILE_NAME=SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage
+            DEB_SIG=$(cat deb/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig)
+            APPIMAGE_SIG=$(cat appimage/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig)
           else
-            DEB_FILE_NAME=Jan_${{ inputs.new_version }}_amd64.deb
-            APPIMAGE_FILE_NAME=Jan_${{ inputs.new_version }}_amd64.AppImage
-            DEB_SIG=$(cat deb/Jan_${{ inputs.new_version }}_amd64.deb.sig)
-            APPIMAGE_SIG=$(cat appimage/Jan_${{ inputs.new_version }}_amd64.AppImage.sig)
+            DEB_FILE_NAME=SalesboxAIAgent_${{ inputs.new_version }}_amd64.deb
+            APPIMAGE_FILE_NAME=SalesboxAIAgent_${{ inputs.new_version }}_amd64.AppImage
+            DEB_SIG=$(cat deb/SalesboxAIAgent_${{ inputs.new_version }}_amd64.deb.sig)
+            APPIMAGE_SIG=$(cat appimage/SalesboxAIAgent_${{ inputs.new_version }}_amd64.AppImage.sig)
           fi
 
           echo "DEB_SIG=$DEB_SIG" >> $GITHUB_OUTPUT
@@ -209,10 +197,10 @@ jobs:
           cd ./src-tauri/target/release/bundle
 
           # Upload for tauri updater
-          aws s3 cp ./appimage/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage
-          aws s3 cp ./deb/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb
-          aws s3 cp ./appimage/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig
-          aws s3 cp ./deb/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig
+          aws s3 cp ./appimage/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage
+          aws s3 cp ./deb/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb
+          aws s3 cp ./appimage/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.AppImage.sig
+          aws s3 cp ./deb/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_amd64.deb.sig
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DELTA_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DELTA_AWS_SECRET_ACCESS_KEY }}

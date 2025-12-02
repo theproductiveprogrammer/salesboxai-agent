@@ -135,23 +135,11 @@ jobs:
 
           # Change app name for beta and nightly builds
           if [ "${{ inputs.channel }}" != "stable" ]; then
-            jq '.plugins.updater.endpoints = ["https://delta.jan.ai/${{ inputs.channel }}/latest.json"]' ./src-tauri/tauri.conf.json > /tmp/tauri.conf.json
-            mv /tmp/tauri.conf.json ./src-tauri/tauri.conf.json
-
-            chmod +x .github/scripts/rename-tauri-app.sh
-            .github/scripts/rename-tauri-app.sh ./src-tauri/tauri.conf.json ${{ inputs.channel }}
-
-            cat ./src-tauri/tauri.conf.json
-
-            # Update Cargo.toml
-            ctoml ./src-tauri/Cargo.toml package.name "Jan-${{ inputs.channel }}"
+            # Update Cargo.toml for non-stable builds
+            ctoml ./src-tauri/Cargo.toml package.name "SalesboxAIAgent-${{ inputs.channel }}"
             ctoml ./src-tauri/Cargo.toml dependencies.tauri.features[] "devtools"
             echo "------------------"
             cat ./src-tauri/Cargo.toml
-
-            chmod +x .github/scripts/rename-workspace.sh
-            .github/scripts/rename-workspace.sh ./package.json ${{ inputs.channel }}
-            cat ./package.json
           fi
       - name: Get key for notarize
         run: base64 -d <<< "$NOTARIZE_P8_BASE64" > /tmp/notary-key.p8
@@ -189,7 +177,7 @@ jobs:
         if: inputs.public_provider != 'github'
         uses: actions/upload-artifact@v4
         with:
-          name: jan-${{ inputs.channel }}-mac-universal-${{ inputs.new_version }}.dmg
+          name: salesboxai-agent-${{ inputs.channel }}-mac-universal-${{ inputs.new_version }}.dmg
           path: |
             ./src-tauri/target/universal-apple-darwin/release/bundle/dmg/*.dmg
 
@@ -198,17 +186,17 @@ jobs:
         run: |
           cd ./src-tauri/target/universal-apple-darwin/release/bundle/macos
           if [ "${{ inputs.channel }}" != "stable" ]; then
-            zip -r jan-${{ inputs.channel }}-mac-universal-${{ inputs.new_version }}.zip Jan-${{ inputs.channel }}.app
-            FILE_NAME=jan-${{ inputs.channel }}-mac-universal-${{ inputs.new_version }}.zip
-            DMG_NAME=Jan-${{ inputs.channel }}_${{ inputs.new_version }}_universal.dmg
-            MAC_UNIVERSAL_SIG=$(cat Jan-${{ inputs.channel }}.app.tar.gz.sig)
-            TAR_NAME=Jan-${{ inputs.channel }}.app.tar.gz
+            zip -r salesboxai-agent-${{ inputs.channel }}-mac-universal-${{ inputs.new_version }}.zip SalesboxAIAgent-${{ inputs.channel }}.app
+            FILE_NAME=salesboxai-agent-${{ inputs.channel }}-mac-universal-${{ inputs.new_version }}.zip
+            DMG_NAME=SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_universal.dmg
+            MAC_UNIVERSAL_SIG=$(cat SalesboxAIAgent-${{ inputs.channel }}.app.tar.gz.sig)
+            TAR_NAME=SalesboxAIAgent-${{ inputs.channel }}.app.tar.gz
           else
-            zip -r jan-mac-universal-${{ inputs.new_version }}.zip Jan.app
-            FILE_NAME=jan-mac-universal-${{ inputs.new_version }}.zip
-            MAC_UNIVERSAL_SIG=$(cat Jan.app.tar.gz.sig)
-            DMG_NAME=Jan_${{ inputs.new_version }}_universal.dmg
-            TAR_NAME=Jan.app.tar.gz
+            zip -r salesboxai-agent-mac-universal-${{ inputs.new_version }}.zip SalesboxAIAgent.app
+            FILE_NAME=salesboxai-agent-mac-universal-${{ inputs.new_version }}.zip
+            MAC_UNIVERSAL_SIG=$(cat SalesboxAIAgent.app.tar.gz.sig)
+            DMG_NAME=SalesboxAIAgent_${{ inputs.new_version }}_universal.dmg
+            TAR_NAME=SalesboxAIAgent.app.tar.gz
           fi
 
           echo "::set-output name=MAC_UNIVERSAL_SIG::$MAC_UNIVERSAL_SIG"
@@ -224,9 +212,9 @@ jobs:
           cd ./src-tauri/target/universal-apple-darwin/release/bundle
 
           # Upload for tauri updater
-          aws s3 cp ./dmg/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_universal.dmg s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/Jan-${{ inputs.channel }}_${{ inputs.new_version }}_universal.dmg
-          aws s3 cp ./macos/Jan-${{ inputs.channel }}.app.tar.gz s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/Jan-${{ inputs.channel }}_${{ inputs.new_version }}.app.tar.gz
-          aws s3 cp ./macos/Jan-${{ inputs.channel }}.app.tar.gz.sig s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/Jan-${{ inputs.channel }}_${{ inputs.new_version }}.app.tar.gz.sig
+          aws s3 cp ./dmg/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_universal.dmg s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_universal.dmg
+          aws s3 cp ./macos/SalesboxAIAgent-${{ inputs.channel }}.app.tar.gz s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}.app.tar.gz
+          aws s3 cp ./macos/SalesboxAIAgent-${{ inputs.channel }}.app.tar.gz.sig s3://${{ secrets.DELTA_AWS_S3_BUCKET_NAME }}/temp-${{ inputs.channel }}/SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}.app.tar.gz.sig
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.DELTA_AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.DELTA_AWS_SECRET_ACCESS_KEY }}
