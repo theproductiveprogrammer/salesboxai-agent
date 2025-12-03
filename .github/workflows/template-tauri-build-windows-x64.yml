@@ -133,7 +133,11 @@ jobs:
           }
           generate_build_version ${{ inputs.new_version }}
           sed -i "s/jan_version/$new_base_version/g" ./src-tauri/tauri.bundle.windows.nsis.template
-          sed -i "s/jan_build/$new_build_version/g" ./src-tauri/tauri.bundle.windows.nsis.template          
+          sed -i "s/jan_build/$new_build_version/g" ./src-tauri/tauri.bundle.windows.nsis.template
+
+          # Replace base path placeholder with actual GitHub Actions path
+          BASEPATH=$(pwd | sed 's/\//\\\\/g')
+          sed -i "s/jan_basepath/$BASEPATH/g" ./src-tauri/tauri.bundle.windows.nsis.template
 
           # Temporarily enable devtool on prod build
           ctoml ./src-tauri/Cargo.toml dependencies.tauri.features[] "devtools"
