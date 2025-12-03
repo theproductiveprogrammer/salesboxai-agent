@@ -30,7 +30,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_http::init())
         .plugin(tauri_plugin_store::Builder::new().build())
-        .plugin(tauri_plugin_updater::Builder::new().build())
+        // .plugin(tauri_plugin_updater::Builder::new().build()) // Disabled - no signing keys configured
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_llamacpp::init())
         .plugin(tauri_plugin_hardware::init())
@@ -128,8 +128,9 @@ pub fn run() {
                     ])
                     .build(),
             )?;
-            app.handle()
-                .plugin(tauri_plugin_updater::Builder::new().build())?;
+            // Updater disabled - no signing keys configured
+            // app.handle()
+            //     .plugin(tauri_plugin_updater::Builder::new().build())?;
             // Install extensions
             if let Err(e) = setup::install_extensions(app.handle().clone(), false) {
                 log::error!("Failed to install extensions: {}", e);
