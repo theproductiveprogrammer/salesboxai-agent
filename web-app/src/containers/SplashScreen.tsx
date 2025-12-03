@@ -39,7 +39,7 @@ export function SplashScreen({ onSuccess }: SplashScreenProps) {
 	return (
 		<div className="fixed inset-0 z-50 flex bg-white animate-in fade-in duration-500">
 			{/* Left side - Branding */}
-			<div className="hidden md:flex md:w-2/5 lg:w-1/3 bg-[#F4F5F6] flex-col justify-between p-8 relative overflow-hidden">
+			<div className="hidden md:flex md:w-2/5 lg:w-1/3 bg-[#F4F5F6] flex-col pt-12 px-8 pb-8 relative overflow-hidden">
 				{/* Decorative art */}
 				<img
 					src="/salesbox-art.png"
@@ -49,29 +49,22 @@ export function SplashScreen({ onSuccess }: SplashScreenProps) {
 
 				{/* Logo and branding */}
 				<div className="relative z-10">
-					<div className="flex items-center gap-3 mb-6">
+					<div className="flex items-center gap-3 mb-4">
 						<img src="/salesbox-logo.png" alt="SalesboxAI" style={{ width: '200px', height: '23px' }} />
 					</div>
 
-					<p className="text-[#151047]/80 text-base max-w-sm leading-relaxed">
+					<p className="text-[#151047]/80 text-sm max-w-sm leading-relaxed mb-8">
 						Welcome to SalesboxAI - a Gen AI powered Sales & Marketing platform to drive Pipeline and Revenue Growth
 					</p>
-				</div>
 
-				{/* Main heading with robot */}
-				<div className="relative z-10 space-y-3 mb-8">
-					<div className="flex items-start gap-4">
-						<img src="/images/splash.png" alt="SalesGenie" className="w-20 h-20 object-contain" />
-						<div>
-							<h1 className="text-3xl font-bold leading-tight">
-								<span className="text-[#E755A6]">SalesGenie</span>
-							</h1>
-							<p className="text-xl font-semibold text-[#151047]">Your AI Meeting-Maker</p>
-							<p className="text-sm text-[#151047]/70 mt-2">
-								The AI assistant that helps Sales Reps book more meetings, faster.
-							</p>
-						</div>
-					</div>
+					{/* Main heading */}
+					<h1 className="text-3xl font-bold leading-tight">
+						<span className="text-[#E755A6]">SalesGenie</span>
+					</h1>
+					<p className="text-base font-semibold text-[#151047]">Your AI Meeting-Maker</p>
+					<p className="text-sm text-[#151047]/70 mt-2">
+						The AI assistant that helps Sales Reps book more meetings, faster.
+					</p>
 				</div>
 			</div>
 
