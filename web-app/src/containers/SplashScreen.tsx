@@ -37,128 +37,149 @@ export function SplashScreen({ onSuccess }: SplashScreenProps) {
 	}
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-gradient-to-br from-primary via-primary to-primary animate-in fade-in duration-500">
-			<div className="w-full max-w-6xl mx-auto px-8 py-12">
-				<div className="grid md:grid-cols-2 gap-12 items-center">
-					{/* Left side - Branding and Image */}
-					<div className="flex flex-col items-center md:items-start space-y-8 text-center md:text-left">
-						<div className="space-y-4">
-							<h1 className="text-5xl md:text-6xl font-bold text-white leading-tight">
-								Welcome to your<br />
-								<span className="text-accent">SalesboxAI</span> Assistant
-							</h1>
-							<p className="text-2xl md:text-3xl text-white/90 font-medium">
-								Let's get Prospecting
-							</p>
-						</div>
+		<div className="fixed inset-0 z-50 flex bg-white animate-in fade-in duration-500">
+			{/* Left side - Branding */}
+			<div className="hidden md:flex md:w-2/5 lg:w-1/3 bg-[#F4F5F6] flex-col justify-between p-8 relative overflow-hidden">
+				{/* Decorative art */}
+				<img
+					src="/salesbox-art.png"
+					alt=""
+					className="absolute bottom-0 left-0 w-80 h-auto pointer-events-none"
+				/>
 
-						{/* Assistant Image */}
-						<div className="w-full max-w-md mx-auto md:mx-0 animate-in slide-in-from-left duration-700">
-							<img
-								src="/images/splash.png"
-								alt="SalesboxAI Assistant"
-								className="w-full h-auto drop-shadow-2xl"
-							/>
-						</div>
+				{/* Logo and branding */}
+				<div className="relative z-10">
+					<div className="flex items-center gap-3 mb-6">
+						<img src="/salesbox-logo.png" alt="SalesboxAI" style={{ width: '200px', height: '23px' }} />
 					</div>
 
-					{/* Right side - Login Form */}
-					<div className="flex items-center justify-center animate-in slide-in-from-right duration-700">
-						<div className="w-full max-w-md bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl p-8 border border-white/20">
-							<div className="mb-6">
-								<h2 className="text-2xl font-bold text-primary mb-2">Sign In</h2>
-								<p className="text-main-view-fg/70">
-									Enter your credentials to get started
+					<p className="text-[#151047]/80 text-base max-w-sm leading-relaxed">
+						Welcome to SalesboxAI - a Gen AI powered Sales & Marketing platform to drive Pipeline and Revenue Growth
+					</p>
+				</div>
+
+				{/* Main heading with robot */}
+				<div className="relative z-10 space-y-3 mb-8">
+					<div className="flex items-start gap-4">
+						<img src="/images/splash.png" alt="SalesGenie" className="w-20 h-20 object-contain" />
+						<div>
+							<h1 className="text-3xl font-bold leading-tight">
+								<span className="text-[#E755A6]">SalesGenie</span>
+							</h1>
+							<p className="text-xl font-semibold text-[#151047]">Your AI Meeting-Maker</p>
+							<p className="text-sm text-[#151047]/70 mt-2">
+								The AI assistant that helps Sales Reps book more meetings, faster.
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			{/* Right side - Login Form */}
+			<div className="w-full md:w-3/5 lg:w-2/3 flex items-center justify-center p-8 bg-white animate-in slide-in-from-right duration-700">
+				<div className="w-full max-w-md">
+					{/* Mobile branding - shown only on small screens */}
+					<div className="md:hidden text-center mb-8">
+						<div className="flex items-center justify-center gap-2 mb-4">
+							<img src="/salesbox-logo.png" alt="SalesboxAI" className="h-8" />
+						</div>
+						<h1 className="text-2xl font-bold text-[#E755A6] mb-1">SalesGenie</h1>
+						<p className="text-[#151047]/70">Your AI Meeting-Maker</p>
+					</div>
+
+					{/* Login card */}
+					<div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8">
+						<div className="mb-6">
+							<h2 className="text-2xl font-bold text-[#151047] mb-2">Login to get started</h2>
+						</div>
+
+						<form onSubmit={handleSubmit} className="space-y-5">
+							<div className="space-y-2">
+								<label htmlFor="endpoint" className="text-sm font-medium text-[#151047]">
+									API Endpoint
+								</label>
+								<Input
+									id="endpoint"
+									type="text"
+									value={endpoint}
+									onChange={(e) => setEndpoint(e.target.value)}
+									placeholder="https://agent.salesbox.ai"
+									disabled={isLoading}
+									className="font-mono text-sm border-gray-200 focus:border-[#E755A6] focus:ring-[#E755A6]/20"
+								/>
+								<p className="text-xs text-gray-400">
+									Use http://localhost:6625/core for local development
 								</p>
 							</div>
 
-							<form onSubmit={handleSubmit} className="space-y-5">
-								<div className="space-y-2">
-									<label htmlFor="endpoint" className="text-sm font-medium text-main-view-fg">
-										API Endpoint
-									</label>
+							<div className="space-y-2">
+								<label htmlFor="username" className="text-sm font-medium text-[#151047]">
+									Username
+								</label>
+								<Input
+									id="username"
+									type="text"
+									value={username}
+									onChange={(e) => setUsername(e.target.value)}
+									placeholder="Enter your username or email"
+									disabled={isLoading}
+									autoComplete="username"
+									autoFocus
+									className="border-gray-200 focus:border-[#E755A6] focus:ring-[#E755A6]/20"
+								/>
+							</div>
+
+							<div className="space-y-2">
+								<label htmlFor="password" className="text-sm font-medium text-[#151047]">
+									Password
+								</label>
+								<div className="relative w-full">
 									<Input
-										id="endpoint"
-										type="text"
-										value={endpoint}
-										onChange={(e) => setEndpoint(e.target.value)}
-										placeholder="https://agent.salesbox.ai"
+										id="password"
+										type={showPassword ? 'text' : 'password'}
+										value={password}
+										onChange={(e) => setPassword(e.target.value)}
+										placeholder="Enter your password"
 										disabled={isLoading}
-										className="font-mono text-sm"
+										autoComplete="current-password"
+										className="pr-10 border-gray-200 focus:border-[#E755A6] focus:ring-[#E755A6]/20"
 									/>
-									<p className="text-xs text-main-view-fg/50">
-										Use http://localhost:6625/core for local development
-									</p>
-								</div>
-
-								<div className="space-y-2">
-									<label htmlFor="username" className="text-sm font-medium text-main-view-fg">
-										Username
-									</label>
-									<Input
-										id="username"
-										type="text"
-										value={username}
-										onChange={(e) => setUsername(e.target.value)}
-										placeholder="Enter your username or email"
+									<button
+										type="button"
+										onClick={() => setShowPassword(!showPassword)}
+										className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1 rounded hover:bg-gray-100 text-gray-400"
 										disabled={isLoading}
-										autoComplete="username"
-										autoFocus
-									/>
+										tabIndex={-1}
+									>
+										{showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+									</button>
 								</div>
+							</div>
 
-								<div className="space-y-2">
-									<label htmlFor="password" className="text-sm font-medium text-main-view-fg">
-										Password
-									</label>
-									<div className="relative w-full">
-										<Input
-											id="password"
-											type={showPassword ? 'text' : 'password'}
-											value={password}
-											onChange={(e) => setPassword(e.target.value)}
-											placeholder="Enter your password"
-											disabled={isLoading}
-											autoComplete="current-password"
-											className="pr-10"
-										/>
-										<button
-											type="button"
-											onClick={() => setShowPassword(!showPassword)}
-											className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 rounded hover:bg-main-view-fg/5 text-main-view-fg/70"
-											disabled={isLoading}
-											tabIndex={-1}
-										>
-											{showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-										</button>
-									</div>
+							{authError && (
+								<div className="bg-red-50 border border-red-200 text-red-600 text-sm rounded-lg p-3">
+									{authError}
 								</div>
+							)}
 
-								{authError && (
-									<div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-md p-3">
-										{authError}
-									</div>
+							<Button
+								type="submit"
+								disabled={isLoading || !username.trim() || !password.trim()}
+								className="w-full h-11 text-base font-medium bg-[#E755A6] hover:bg-[#D14A96] text-white rounded-lg"
+							>
+								{isLoading ? (
+									<>
+										<span className="animate-spin mr-2">⏳</span>
+										Signing in...
+									</>
+								) : (
+									<>
+										<LogIn size={18} className="mr-2" />
+										Login
+									</>
 								)}
-
-								<Button
-									type="submit"
-									disabled={isLoading || !username.trim() || !password.trim()}
-									className="w-full h-12 text-base"
-								>
-									{isLoading ? (
-										<>
-											<span className="animate-spin mr-2">⏳</span>
-											Signing in...
-										</>
-									) : (
-										<>
-											<LogIn size={18} className="mr-2" />
-											Sign In
-										</>
-									)}
-								</Button>
-							</form>
-						</div>
+							</Button>
+						</form>
 					</div>
 				</div>
 			</div>
