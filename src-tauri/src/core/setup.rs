@@ -1,7 +1,7 @@
 use flate2::read::GzDecoder;
 use std::{
     fs::{self, File},
-    io::{Read, Write},
+    io::{Read, /*Write*/},
     path::PathBuf,
 };
 use tar::Archive;
@@ -166,6 +166,7 @@ pub fn install_extensions(app: tauri::AppHandle, force: bool) -> Result<(), Stri
 
 /// Download and install MCP services from remote endpoint
 /// Checks version and only downloads if newer version is available
+/*
 pub async fn install_mcp_from_remote(app: tauri::AppHandle) -> Result<(), String> {
     use tauri_plugin_store::StoreExt;
 
@@ -288,6 +289,7 @@ pub async fn install_mcp_from_remote(app: tauri::AppHandle) -> Result<(), String
 
     Ok(())
 }
+*/
 
 pub fn extract_extension_manifest<R: Read>(
     archive: &mut Archive<R>,

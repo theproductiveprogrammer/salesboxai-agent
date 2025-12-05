@@ -81,7 +81,7 @@ pub fn run() {
             core::mcp::commands::call_tool,
             core::mcp::commands::cancel_tool_call,
             core::mcp::commands::restart_mcp_servers,
-            core::mcp::commands::reinitialize_mcp_servers,
+            // core::mcp::commands::reinitialize_mcp_servers,
             core::mcp::commands::get_connected_servers,
             core::mcp::commands::save_mcp_configs,
             core::mcp::commands::get_mcp_configs,

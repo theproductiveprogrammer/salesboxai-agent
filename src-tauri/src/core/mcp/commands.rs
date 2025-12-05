@@ -1,8 +1,8 @@
 use rmcp::model::{CallToolRequestParam, CallToolResult};
 use serde_json::{Map, Value};
-use std::sync::OnceLock;
+//use std::sync::OnceLock;
 use tauri::{AppHandle, Emitter, Runtime, State};
-use tokio::sync::Mutex as TokioMutex;
+//use tokio::sync::Mutex as TokioMutex;
 use tokio::time::timeout;
 use tokio::sync::oneshot;
 
@@ -18,7 +18,7 @@ use crate::core::{
 use std::fs;
 
 /// Global mutex to prevent concurrent reinitialization of MCP servers
-static REINIT_LOCK: OnceLock<TokioMutex<()>> = OnceLock::new();
+// static REINIT_LOCK: OnceLock<TokioMutex<()>> = OnceLock::new();
 
 #[tauri::command]
 pub async fn activate_mcp_server<R: Runtime>(
@@ -99,6 +99,7 @@ pub async fn restart_mcp_servers(app: AppHandle, state: State<'_, AppState>) -> 
     Ok(())
 }
 
+/*
 /// Reinitialize MCP servers (download from remote + start builtin)
 /// This is called after login when the endpoint is changed
 #[tauri::command]
@@ -157,6 +158,7 @@ pub async fn reinitialize_mcp_servers(app: AppHandle, state: State<'_, AppState>
 
     Ok(())
 }
+*/
 
 /// Reset MCP restart count for a specific server (like cortex reset)
 #[tauri::command]
