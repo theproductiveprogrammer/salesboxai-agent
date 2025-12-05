@@ -76,10 +76,6 @@
       "schemes": [
         "salesbox-ai-agent"
       ]
-    },
-    "updater": {
-      "pubkey": "",
-      "endpoints": []
     }
   },
   "bundle": {

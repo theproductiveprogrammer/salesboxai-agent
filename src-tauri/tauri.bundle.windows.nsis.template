@@ -44,7 +44,7 @@ ${StrLoc}
 !define COPYRIGHT ""
 !define OUTFILE "nsis-output.exe"
 !define ARCH "x64"
-!define ADDITIONALPLUGINSPATH "jan_basepath\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\additional"
+; !define ADDITIONALPLUGINSPATH "jan_basepath\src-tauri\target\release\nsis\x64\Plugins\x86-unicode\additional"
 !define ALLOWDOWNGRADES "true"
 !define DISPLAYLANGUAGESELECTOR "false"
 !define INSTALLWEBVIEW2MODE "downloadBootstrapper"
@@ -87,8 +87,8 @@ VIAddVersionKey "LegalCopyright" "${COPYRIGHT}"
 VIAddVersionKey "FileVersion" "${VERSION}"
 VIAddVersionKey "ProductVersion" "${VERSION}"
 
-# additional plugins
-!addplugindir "${ADDITIONALPLUGINSPATH}"
+; additional plugins (disabled)
+; !addplugindir "${ADDITIONALPLUGINSPATH}"
 
 ; Uninstaller signing command
 !if "${UNINSTALLERSIGNCOMMAND}" != ""
@@ -452,7 +452,6 @@ FunctionEnd
 ;Languages
 !insertmacro MUI_LANGUAGE "English"
 !insertmacro MUI_RESERVEFILE_LANGDLL
-  !include "jan_basepath\src-tauri\target\release\nsis\x64\English.nsh"
 
 Function .onInit
   ${GetOptions} $CMDLINE "/P" $PassiveMode

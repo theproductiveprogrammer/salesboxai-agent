@@ -119,7 +119,7 @@ jobs:
         run: |
           echo "Version: ${{ inputs.new_version }}"
           # Update tauri.conf.json
-          jq --arg version "${{ inputs.new_version }}" '.version = $version | .bundle.createUpdaterArtifacts = true' ./src-tauri/tauri.conf.json > /tmp/tauri.conf.json
+          jq --arg version "${{ inputs.new_version }}" '.version = $version' ./src-tauri/tauri.conf.json > /tmp/tauri.conf.json
           mv /tmp/tauri.conf.json ./src-tauri/tauri.conf.json
           jq --arg version "${{ inputs.new_version }}" '.version = $version' web-app/package.json > /tmp/package.json
           mv /tmp/package.json web-app/package.json
