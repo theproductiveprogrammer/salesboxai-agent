@@ -1,153 +1,67 @@
 import { useState } from 'react'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { useAssistant } from '@/hooks/useAssistant'
-import AddEditAssistant from './dialogs/AddEditAssistant'
-import { IconCirclePlus, IconSettings } from '@tabler/icons-react'
-import { useThreads } from '@/hooks/useThreads'
+import { useSalesbot } from '@/hooks/useSalesbot'
+import ViewSalesbot from './dialogs/ViewSalesbot'
+import { IconSettings, IconAlertCircle } from '@tabler/icons-react'
 import { AvatarEmoji } from '@/containers/AvatarEmoji'
 
 const DropdownAssistant = () => {
-  const {
-    assistants,
-    currentAssistant,
-    addAssistant,
-    updateAssistant,
-    setCurrentAssistant,
-  } = useAssistant()
-  const { updateCurrentThreadAssistant } = useThreads()
-  const [dropdownOpen, setDropdownOpen] = useState(false)
+  const { salesbot, isLoading, error } = useSalesbot()
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingAssistantId, setEditingAssistantId] = useState<string | null>(
-    null
-  )
 
-  const selectedAssistant =
-    assistants.find((a) => a.id === currentAssistant.id) || assistants[0]
+  // Show error state if no salesbot
+  if (error) {
+    return (
+      <div className="flex items-center gap-2 bg-destructive/10 py-1 px-2 rounded-sm">
+        <IconAlertCircle size={16} className="text-destructive shrink-0" />
+        <span className="text-destructive text-sm truncate max-w-40">
+          {error}
+        </span>
+      </div>
+    )
+  }
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 bg-primary/8 py-1 px-2 rounded-sm animate-pulse">
+        <span className="shrink-0 w-4 h-4 bg-primary/20 rounded" />
+        <span className="h-4 w-24 bg-primary/20 rounded" />
+      </div>
+    )
+  }
 
   return (
     <>
-      <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-        <div className="flex items-center justify-between gap-2 bg-primary/8 py-1 hover:bg-primary/12 px-2 rounded-sm">
-          <DropdownMenuTrigger asChild>
-            <button className="font-medium cursor-pointer flex items-center gap-1.5 relative z-20 max-w-40">
-              <div className="text-primary flex items-center gap-1">
-                {selectedAssistant?.avatar && (
-                  <span className="shrink-0 w-4 h-4 relative flex items-center justify-center">
-                    <AvatarEmoji
-                      avatar={selectedAssistant.avatar}
-                      imageClassName="object-cover"
-                      textClassName="text-sm"
-                    />
-                  </span>
-                )}
-                <div className="truncate max-w-30">
-                  <span>{selectedAssistant?.name || 'SalesboxAI Agent'}</span>
-                </div>
-              </div>
-            </button>
-          </DropdownMenuTrigger>
-          <div
-            className="size-5 cursor-pointer relative z-10 flex items-center justify-center rounded hover:bg-primary/10 transition-all duration-200 ease-in-out "
-            onClick={() => {
-              if (selectedAssistant) {
-                setEditingAssistantId(selectedAssistant.id)
-                setDialogOpen(true)
-              }
-            }}
-          >
-            <IconSettings
-              size={16}
-              className="text-primary/70"
-              title="Edit Assistant"
-            />
+      <div className="flex items-center justify-between gap-2 bg-primary/8 py-1 hover:bg-primary/12 px-2 rounded-sm">
+        <div className="font-medium flex items-center gap-1.5 max-w-40">
+          <div className="text-primary flex items-center gap-1">
+            <span className="shrink-0 w-4 h-4 relative flex items-center justify-center">
+              <AvatarEmoji
+                avatar="👋"
+                imageClassName="object-cover"
+                textClassName="text-sm"
+              />
+            </span>
+            <div className="truncate max-w-30">
+              <span>{salesbot?.name || 'Sales Assistant'}</span>
+            </div>
           </div>
         </div>
-        <DropdownMenuContent
-          className="w-44 max-h-[320px]"
-          side="bottom"
-          sideOffset={10}
-          align="start"
+        <div
+          className="size-5 cursor-pointer relative z-10 flex items-center justify-center rounded hover:bg-primary/10 transition-all duration-200 ease-in-out"
+          onClick={() => setDialogOpen(true)}
         >
-          {assistants.map((assistant) => (
-            <div
-              className="relative pr-6 hover:bg-main-view-fg/4 rounded-sm"
-              key={assistant.id}
-            >
-              <DropdownMenuItem
-                className="hover:bg-transparent"
-                onClick={() => {
-                  setCurrentAssistant(assistant)
-                  updateCurrentThreadAssistant(assistant)
-                }}
-              >
-                <div className="text-main-view-fg/70 cursor-pointer flex gap-2 w-full">
-                  {assistant?.avatar && (
-                    <div className="shrink-0 relative w-4 h-4">
-                      <AvatarEmoji
-                        avatar={assistant?.avatar}
-                        imageClassName="object-cover"
-                        textClassName=""
-                      />
-                    </div>
-                  )}
-
-                  <div className="text-left">
-                    <span className="line-clamp-1">{assistant.name}</span>
-                  </div>
-                </div>
-              </DropdownMenuItem>
-              <div className="absolute top-1/2 -translate-y-1/2 right-1">
-                <div className="size-5 text-main-view-fg/50 cursor-pointer relative z-10 flex items-center justify-center rounded hover:bg-main-view-fg/10 transition-all duration-200 ease-in-out">
-                  <IconSettings
-                    size={16}
-                    onClick={() => {
-                      setEditingAssistantId(assistant.id)
-                      setDialogOpen(true)
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
-          ))}
-
-          <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => {
-              setEditingAssistantId(null)
-              setDialogOpen(true)
-            }}
-          >
-            <IconCirclePlus />
-            <span className="truncate text-main-view-fg/70">
-              Create Assistant
-            </span>
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <AddEditAssistant
+          <IconSettings
+            size={16}
+            className="text-primary/70"
+            title="View Assistant Details"
+          />
+        </div>
+      </div>
+      <ViewSalesbot
         open={dialogOpen}
         onOpenChange={setDialogOpen}
-        editingKey={editingAssistantId}
-        initialData={
-          editingAssistantId
-            ? assistants.find((a) => a.id === editingAssistantId)
-            : undefined
-        }
-        onSave={(assistant) => {
-          if (editingAssistantId) {
-            updateAssistant(assistant)
-          } else {
-            addAssistant(assistant)
-          }
-          setEditingAssistantId(null)
-          setDialogOpen(false)
-        }}
+        salesbot={salesbot}
       />
     </>
   )

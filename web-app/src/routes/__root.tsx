@@ -31,6 +31,7 @@ import GlobalError from '@/containers/GlobalError'
 import { GlobalEventHandler } from '@/providers/GlobalEventHandler'
 import ErrorDialog from '@/containers/dialogs/ErrorDialog'
 import { useSalesboxAuth } from '@/hooks/useSalesboxAuth'
+import { useSalesbot } from '@/hooks/useSalesbot'
 import { startAutoRefresh, stopAutoRefresh } from '@/services/auth'
 import { LoginDialog } from '@/containers/LoginDialog'
 import { SplashScreen } from '@/containers/SplashScreen'
@@ -195,6 +196,7 @@ const LogsLayout = () => {
 function RootLayout() {
   const router = useRouterState()
   const { isAuthenticated, loadStoredCredentials } = useSalesboxAuth()
+  const { fetchSalesbot, clearSalesbot } = useSalesbot()
   const [showLoginDialog, setShowLoginDialog] = useState(false)
   const [showSplashScreen, setShowSplashScreen] = useState(false)
   const [authInitialized, setAuthInitialized] = useState(false)
@@ -250,6 +252,15 @@ function RootLayout() {
       stopAutoRefresh()
     }
   }, [isAuthenticated])
+
+  // Fetch salesbot info when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      fetchSalesbot()
+    } else {
+      clearSalesbot()
+    }
+  }, [isAuthenticated, fetchSalesbot, clearSalesbot])
 
   return (
     <Fragment>

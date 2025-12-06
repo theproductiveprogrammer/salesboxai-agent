@@ -144,3 +144,52 @@ export async function sendSalesboxMessage(message: string, model?: string) {
     }),
   })
 }
+
+/**
+ * Salesbot info response from the backend
+ */
+export interface SalesbotInfo {
+  id: number
+  name: string
+  goal: string
+  backstory: string
+}
+
+/**
+ * Get the salesbot associated with the current user
+ */
+export async function getSalesbotInfo(): Promise<SalesbotInfo | null> {
+  const response = await callSalesboxApi<{
+    id: number
+    name: string
+    type: string
+    info: string
+  }>('/mcp/salesbot-info', { method: 'POST' })
+
+  if (response.error || !response.data) {
+    console.error('Failed to get salesbot info:', response.error)
+    return null
+  }
+
+  const data = response.data
+  let goal = ''
+  let backstory = ''
+
+  // Parse the info field which contains goal and backstory as JSON
+  if (data.info) {
+    try {
+      const info = JSON.parse(data.info)
+      goal = info.goal || ''
+      backstory = info.backstory || ''
+    } catch (error) {
+      console.warn('Failed to parse salesbot info:', error)
+    }
+  }
+
+  return {
+    id: data.id,
+    name: data.name,
+    goal,
+    backstory,
+  }
+}
