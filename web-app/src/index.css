@@ -41,16 +41,17 @@
   /* Button */
   --radius: 0.625rem;
   --font-size-base: 15px;
-  --app-bg: '';
-  --app-left-panel-fg: '';
-  --app-main-view: '';
-  --app-main-view-fg: '';
-  --app-primary: '';
-  --app-primary-fg: '';
-  --app-accent: '';
-  --app-accent-fg: '';
-  --app-destructive: '';
-  --app-destructive-fg: '';
+  /* Default light theme colors - will be overridden by useAppearance hook */
+  --app-bg: oklch(0.97 0 0); /* rgb(246,246,247) */
+  --app-left-panel-fg: #000;
+  --app-main-view: oklch(1 0 0); /* rgb(255,255,255) */
+  --app-main-view-fg: #000;
+  --app-primary: oklch(0.35 0.15 310); /* rgb(86,23,126) */
+  --app-primary-fg: #FFF;
+  --app-accent: oklch(0.77 0.05 310); /* rgb(191,161,199) */
+  --app-accent-fg: #000;
+  --app-destructive: oklch(0.68 0.1 350); /* rgb(217,123,166) */
+  --app-destructive-fg: #FFF;
 }
 
 @layer base {

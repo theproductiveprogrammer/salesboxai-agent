@@ -24,6 +24,7 @@ export const route = {
   visitors: '/visitors',
   asyncJobs: '/async-jobs',
   prospecting: '/prospecting',
+  dailyLeads: '/daily-leads',
   localApiServerlogs: '/local-api-server/logs',
   systemMonitor: '/system-monitor',
   threadsDetail: '/threads/$threadId',

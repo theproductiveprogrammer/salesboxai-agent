@@ -14,6 +14,7 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as SystemMonitorImport } from './routes/system-monitor'
 import { Route as ProspectingImport } from './routes/prospecting'
 import { Route as LogsImport } from './routes/logs'
+import { Route as DailyLeadsImport } from './routes/daily-leads'
 import { Route as AsyncJobsImport } from './routes/async-jobs'
 import { Route as AssistantImport } from './routes/assistant'
 import { Route as IndexImport } from './routes/index'
@@ -51,6 +52,12 @@ const ProspectingRoute = ProspectingImport.update({
 const LogsRoute = LogsImport.update({
   id: '/logs',
   path: '/logs',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const DailyLeadsRoute = DailyLeadsImport.update({
+  id: '/daily-leads',
+  path: '/daily-leads',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -192,6 +199,13 @@ declare module '@tanstack/react-router' {
       path: '/async-jobs'
       fullPath: '/async-jobs'
       preLoaderRoute: typeof AsyncJobsImport
+      parentRoute: typeof rootRoute
+    }
+    '/daily-leads': {
+      id: '/daily-leads'
+      path: '/daily-leads'
+      fullPath: '/daily-leads'
+      preLoaderRoute: typeof DailyLeadsImport
       parentRoute: typeof rootRoute
     }
     '/logs': {
@@ -336,6 +350,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/async-jobs': typeof AsyncJobsRoute
+  '/daily-leads': typeof DailyLeadsRoute
   '/logs': typeof LogsRoute
   '/prospecting': typeof ProspectingRoute
   '/system-monitor': typeof SystemMonitorRoute
@@ -361,6 +376,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/async-jobs': typeof AsyncJobsRoute
+  '/daily-leads': typeof DailyLeadsRoute
   '/logs': typeof LogsRoute
   '/prospecting': typeof ProspectingRoute
   '/system-monitor': typeof SystemMonitorRoute
@@ -387,6 +403,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/async-jobs': typeof AsyncJobsRoute
+  '/daily-leads': typeof DailyLeadsRoute
   '/logs': typeof LogsRoute
   '/prospecting': typeof ProspectingRoute
   '/system-monitor': typeof SystemMonitorRoute
@@ -414,6 +431,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/async-jobs'
+    | '/daily-leads'
     | '/logs'
     | '/prospecting'
     | '/system-monitor'
@@ -438,6 +456,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/async-jobs'
+    | '/daily-leads'
     | '/logs'
     | '/prospecting'
     | '/system-monitor'
@@ -462,6 +481,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/async-jobs'
+    | '/daily-leads'
     | '/logs'
     | '/prospecting'
     | '/system-monitor'
@@ -488,6 +508,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistantRoute: typeof AssistantRoute
   AsyncJobsRoute: typeof AsyncJobsRoute
+  DailyLeadsRoute: typeof DailyLeadsRoute
   LogsRoute: typeof LogsRoute
   ProspectingRoute: typeof ProspectingRoute
   SystemMonitorRoute: typeof SystemMonitorRoute
@@ -513,6 +534,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistantRoute: AssistantRoute,
   AsyncJobsRoute: AsyncJobsRoute,
+  DailyLeadsRoute: DailyLeadsRoute,
   LogsRoute: LogsRoute,
   ProspectingRoute: ProspectingRoute,
   SystemMonitorRoute: SystemMonitorRoute,
@@ -547,6 +569,7 @@ export const routeTree = rootRoute
         "/",
         "/assistant",
         "/async-jobs",
+        "/daily-leads",
         "/logs",
         "/prospecting",
         "/system-monitor",
@@ -576,6 +599,9 @@ export const routeTree = rootRoute
     },
     "/async-jobs": {
       "filePath": "async-jobs.tsx"
+    },
+    "/daily-leads": {
+      "filePath": "daily-leads.tsx"
     },
     "/logs": {
       "filePath": "logs.tsx"

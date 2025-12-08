@@ -14,6 +14,7 @@ import {
 	IconGrain,
 	IconUsers,
 	IconTargetArrow,
+	IconCalendarEvent,
 } from '@tabler/icons-react'
 import { route } from '@/constants/routes'
 import ThreadList from './ThreadList'
@@ -50,6 +51,11 @@ const mainMenus = [
 		title: 'common:newChat',
 		icon: IconCirclePlusFilled,
 		route: route.home,
+	},
+	{
+		title: 'common:dailyLeads',
+		icon: IconCalendarEvent,
+		route: route.dailyLeads,
 	},
 	{
 		title: 'common:visitors',
