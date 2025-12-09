@@ -730,7 +730,7 @@ const ChatInput = ({
                 </Button>
               )}
 
-              <div className="opacity-80">
+              <div className="opacity-80 hidden">
                 <TooltipProvider>
                   <Tooltip
                     open={tooltipToolsAvailable}
