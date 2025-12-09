@@ -37,7 +37,7 @@ const DropdownAssistant = () => {
           <div className="text-primary flex items-center gap-1">
             <span className="shrink-0 w-4 h-4 relative flex items-center justify-center">
               <AvatarEmoji
-                avatar="👋"
+                avatar="/images/assistants/salesboxai.svg"
                 imageClassName="object-cover"
                 textClassName="text-sm"
               />
