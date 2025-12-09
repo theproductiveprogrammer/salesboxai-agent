@@ -730,65 +730,59 @@ const ChatInput = ({
                 </Button>
               )}
 
-              {selectedModel?.capabilities?.includes('tools') &&
-                hasActiveMCPServers && (
-                  <div className="opacity-80 hidden">
-                    <TooltipProvider>
-                      <Tooltip
-                        open={tooltipToolsAvailable}
-                        onOpenChange={setTooltipToolsAvailable}
+              <div className="opacity-80">
+                <TooltipProvider>
+                  <Tooltip
+                    open={tooltipToolsAvailable}
+                    onOpenChange={setTooltipToolsAvailable}
+                  >
+                    <TooltipTrigger asChild disabled={dropdownToolsAvailable}>
+                      <div
+                        onClick={(e) => {
+                          setDropdownToolsAvailable(false)
+                          e.stopPropagation()
+                        }}
                       >
-                        <TooltipTrigger
-                          asChild
-                          disabled={dropdownToolsAvailable}
+                        <DropdownToolsAvailable
+                          initialMessage={initialMessage}
+                          onOpenChange={(isOpen) => {
+                            setDropdownToolsAvailable(isOpen)
+                            if (isOpen) {
+                              setTooltipToolsAvailable(false)
+                            }
+                          }}
                         >
-                          <div
-                            onClick={(e) => {
-                              setDropdownToolsAvailable(false)
-                              e.stopPropagation()
-                            }}
-                          >
-                            <DropdownToolsAvailable
-                              initialMessage={initialMessage}
-                              onOpenChange={(isOpen) => {
-                                setDropdownToolsAvailable(isOpen)
-                                if (isOpen) {
-                                  setTooltipToolsAvailable(false)
-                                }
-                              }}
-                            >
-                              {(isOpen, toolsCount) => {
-                                return (
-                                  <div
-                                    className={cn(
-                                      'h-7 p-1 pr-3 flex items-center justify-center rounded-sm hover:bg-main-view-fg/10 transition-all duration-200 ease-in-out gap-1 cursor-pointer relative',
-                                      isOpen && 'bg-main-view-fg/10'
-                                    )}
-                                  >
-                                    <IconTool
-                                      size={18}
-                                      className="text-main-view-fg/50"
-                                    />
-                                    {toolsCount > 0 && (
-                                      <div className="absolute -top-0.5 -right-1 bg-accent text-accent-fg text-xs rounded-full size-5 flex items-center justify-center font-medium">
-                                        <span className="leading-0 text-xs">
-                                          {toolsCount > 99 ? '99+' : toolsCount}
-                                        </span>
-                                      </div>
-                                    )}
+                          {(isOpen, toolsCount) => {
+                            return (
+                              <div
+                                className={cn(
+                                  'h-7 p-1 pr-3 flex items-center justify-center rounded-sm hover:bg-main-view-fg/10 transition-all duration-200 ease-in-out gap-1 cursor-pointer relative',
+                                  isOpen && 'bg-main-view-fg/10'
+                                )}
+                              >
+                                <IconTool
+                                  size={18}
+                                  className="text-main-view-fg/50"
+                                />
+                                {toolsCount > 0 && (
+                                  <div className="absolute -top-0.5 -right-1 bg-accent text-accent-fg text-xs rounded-full size-5 flex items-center justify-center font-medium">
+                                    <span className="leading-0 text-xs">
+                                      {toolsCount > 99 ? '99+' : toolsCount}
+                                    </span>
                                   </div>
-                                )
-                              }}
-                            </DropdownToolsAvailable>
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{t('tools')}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                )}
+                                )}
+                              </div>
+                            )
+                          }}
+                        </DropdownToolsAvailable>
+                      </div>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{t('tools')}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
             </div>
           </div>
         </div>
