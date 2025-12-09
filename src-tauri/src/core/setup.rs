@@ -7,9 +7,7 @@ use std::{
 use tar::Archive;
 use tauri::{App, Emitter, Manager};
 use tauri_plugin_store::StoreExt;
-// use tokio::sync::Mutex;
-// use tokio::time::{sleep, Duration}; // Using tokio::sync::Mutex
-//                                     // MCP
+use tokio::time::{sleep, Duration};
 
 // MCP
 use super::{
@@ -321,6 +319,16 @@ pub fn extract_extension_manifest<R: Read>(
     Ok(None)
 }
 
+/// Get retry delay for MCP server connection.
+/// Delays: 10s -> 15s -> 30s -> 30s -> ... (capped at 30s)
+fn get_mcp_retry_delay(attempt: u32) -> Duration {
+    match attempt {
+        0 => Duration::from_secs(10),
+        1 => Duration::from_secs(15),
+        _ => Duration::from_secs(30),
+    }
+}
+
 pub fn setup_mcp(app: &App) {
     let state = app.state::<AppState>();
     let servers = state.mcp_servers.clone();
@@ -333,8 +341,36 @@ pub fn setup_mcp(app: &App) {
         // }
 
         // Then start the built-in SalesboxAI MCP server (if API key is configured)
-        if let Err(e) = start_builtin_salesbox_mcp(&app_handle, servers.clone()).await {
-            log::warn!("SalesboxAI builtin MCP server not started: {}", e);
+        // Retry indefinitely until successful - we know the server must be available
+        let mut attempt: u32 = 0;
+        loop {
+            match start_builtin_salesbox_mcp(&app_handle, servers.clone()).await {
+                Ok(()) => {
+                    log::info!("SalesboxAI builtin MCP server started successfully");
+                    break;
+                }
+                Err(e) => {
+                    // Check if the error indicates credentials aren't configured (don't retry)
+                    if e.contains("credentials not configured") || e.contains("Store not available") {
+                        log::info!("SalesboxAI MCP server skipped: {}", e);
+                        break;
+                    }
+
+                    let delay = get_mcp_retry_delay(attempt);
+                    log::warn!(
+                        "SalesboxAI builtin MCP server not started (attempt {}): {}. Retrying in {}s...",
+                        attempt + 1,
+                        e,
+                        delay.as_secs()
+                    );
+
+                    // Emit update so UI knows tools aren't available yet
+                    let _ = app_handle.emit("mcp-update", "MCP servers updated");
+
+                    sleep(delay).await;
+                    attempt += 1;
+                }
+            }
         }
 
         // Finally start other configured MCP servers
