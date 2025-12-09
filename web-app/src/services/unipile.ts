@@ -16,6 +16,12 @@ export interface UnipileAuthLinkResponse {
   error?: string
 }
 
+export interface GetUnipileAccountIdResponse {
+  success: boolean
+  accountId?: string | null
+  error?: string
+}
+
 export async function setUnipileAccountId(
   accountId: string
 ): Promise<SetUnipileAccountIdResponse> {
@@ -39,6 +45,21 @@ export async function getUnipileAuthLink(): Promise<UnipileAuthLinkResponse> {
     '/mcp/unipile/auth-link',
     {
       method: 'POST',
+    }
+  )
+
+  if (response.error) {
+    throw new Error(response.error)
+  }
+
+  return response.data || { success: false, error: 'Unknown error' }
+}
+
+export async function getUnipileAccountId(): Promise<GetUnipileAccountIdResponse> {
+  const response = await callSalesboxApi<GetUnipileAccountIdResponse>(
+    '/mcp/unipile/account-id',
+    {
+      method: 'GET',
     }
   )
 

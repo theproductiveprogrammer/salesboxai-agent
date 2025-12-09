@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Save, CheckCircle, XCircle, Linkedin, ChevronDown, ChevronUp } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { setUnipileAccountId, getUnipileAuthLink } from '@/services/unipile'
+import { setUnipileAccountId, getUnipileAuthLink, getUnipileAccountId } from '@/services/unipile'
 import { useSalesboxAuth } from '@/hooks/useSalesboxAuth'
 import { openUrl } from '@tauri-apps/plugin-opener'
 
@@ -11,9 +11,36 @@ export function UnipileAccountIdInput() {
   const [accountId, setAccountId] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [isConnecting, setIsConnecting] = useState(false)
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true)
+  const [isConnected, setIsConnected] = useState(false)
+  const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null)
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
   const [showManualInput, setShowManualInput] = useState(false)
+
+  // Check existing connection status on mount
+  useEffect(() => {
+    async function checkConnectionStatus() {
+      if (!isAuthenticated) {
+        setIsCheckingStatus(false)
+        return
+      }
+
+      try {
+        const response = await getUnipileAccountId()
+        if (response.success && response.accountId) {
+          setIsConnected(true)
+          setConnectedAccountId(response.accountId)
+        }
+      } catch {
+        // Silently fail - user just won't see connected state
+      } finally {
+        setIsCheckingStatus(false)
+      }
+    }
+
+    checkConnectionStatus()
+  }, [isAuthenticated])
 
   // Check URL params for success/failure from redirect
   useEffect(() => {
@@ -23,6 +50,13 @@ export function UnipileAccountIdInput() {
     if (linkedinStatus === 'success') {
       setStatus('success')
       setMessage('LinkedIn account connected successfully!')
+      setIsConnected(true)
+      // Refetch to get the account ID
+      getUnipileAccountId().then(response => {
+        if (response.success && response.accountId) {
+          setConnectedAccountId(response.accountId)
+        }
+      }).catch(() => {})
       // Clean up URL params
       const url = new URL(window.location.href)
       url.searchParams.delete('linkedin')
@@ -87,6 +121,8 @@ export function UnipileAccountIdInput() {
       if (response.success) {
         setStatus('success')
         setMessage(response.message || 'Account ID saved successfully')
+        setIsConnected(true)
+        setConnectedAccountId(accountId.trim())
         // Clear input after successful save
         setTimeout(() => {
           setAccountId('')
@@ -116,17 +152,38 @@ export function UnipileAccountIdInput() {
     )
   }
 
+  if (isCheckingStatus) {
+    return (
+      <div className="text-sm text-main-view-fg/70">
+        Checking connection status...
+      </div>
+    )
+  }
+
   return (
     <div className="flex flex-col gap-3 w-full">
+      {/* Connected Status */}
+      {isConnected && (
+        <div className="flex items-center gap-2 text-sm text-green-700 dark:text-green-400">
+          <CheckCircle size={16} />
+          <span>LinkedIn account connected</span>
+          {connectedAccountId && (
+            <span className="text-main-view-fg/40 text-xs ml-auto">
+              ID: {connectedAccountId.slice(0, 2)}...
+            </span>
+          )}
+        </div>
+      )}
+
       {/* Connect LinkedIn Button */}
       <Button
         onClick={handleConnect}
         disabled={isConnecting}
-        variant="default"
+        variant={isConnected ? 'outline' : 'default'}
         className="w-full justify-center gap-2"
       >
         <Linkedin size={18} />
-        {isConnecting ? 'Opening browser...' : 'Connect LinkedIn Account'}
+        {isConnecting ? 'Opening browser...' : isConnected ? 'Reconnect LinkedIn Account' : 'Connect LinkedIn Account'}
       </Button>
 
       {/* Manual Input Toggle */}
