@@ -7,12 +7,6 @@ import type {
   DailyLead,
   DailyLeadsRequest,
   DailyLeadsResponse,
-  AddToQueueRequest,
-  AddToQueueResponse,
-  QueueStatusRequest,
-  QueueStatusResponse,
-  StartQueueProspectingRequest,
-  StartQueueProspectingResponse,
   FetchLeadProfileRequest,
 } from '@/types/dailyLeads'
 
@@ -129,96 +123,6 @@ export async function getDailyLeads(
 }
 
 /**
- * Add selected leads to the processing queue
- */
-export async function addLeadsToQueue(
-  linkedinUrls: string[]
-): Promise<AddToQueueResponse> {
-  const request: AddToQueueRequest = { linkedinUrls }
-
-  const response = await callSalesboxApi<AddToQueueResponse>(
-    '/mcp/daily-leads/add-to-queue',
-    {
-      method: 'POST',
-      body: JSON.stringify(request),
-    }
-  )
-
-  if (response.error || !response.data) {
-    return {
-      prospectListId: null,
-      addedCount: 0,
-      alreadyInQueueCount: 0,
-      addedLeadIds: [],
-      error: response.error || 'Failed to add leads to queue',
-    }
-  }
-
-  return response.data
-}
-
-/**
- * Get the current queue status
- */
-export async function getQueueStatus(
-  request: QueueStatusRequest = {}
-): Promise<QueueStatusResponse> {
-  const response = await callSalesboxApi<QueueStatusResponse>(
-    '/mcp/daily-leads/queue-status',
-    {
-      method: 'POST',
-      body: JSON.stringify(request),
-    }
-  )
-
-  if (response.error || !response.data) {
-    return {
-      prospectListId: null,
-      workflowId: null,
-      isRunning: false,
-      isPaused: false,
-      currentLeadId: null,
-      pendingCount: 0,
-      processingCount: 0,
-      waitingCount: 0,
-      completedCount: 0,
-      failedCount: 0,
-      nextWakeTimestamp: null,
-      queuedLeads: [],
-      error: response.error || 'Failed to get queue status',
-    }
-  }
-
-  return response.data
-}
-
-/**
- * Start or resume the queue prospecting workflow
- */
-export async function startQueueProspecting(
-  request: StartQueueProspectingRequest = {}
-): Promise<StartQueueProspectingResponse> {
-  const response = await callSalesboxApi<StartQueueProspectingResponse>(
-    '/mcp/daily-leads/start-prospecting',
-    {
-      method: 'POST',
-      body: JSON.stringify(request),
-    }
-  )
-
-  if (response.error || !response.data) {
-    return {
-      workflowId: null,
-      status: 'NO_LEADS',
-      queueSize: 0,
-      error: response.error || 'Failed to start queue prospecting',
-    }
-  }
-
-  return response.data
-}
-
-/**
  * Fetch LinkedIn profile for a lead by lead ID
  */
 export async function fetchLeadProfile(
@@ -245,4 +149,75 @@ export async function fetchLeadProfile(
 
   // Map the raw response to DailyLead
   return mapRawLead(response.data)
+}
+
+// Backend response for prospect-lead endpoint
+interface ProspectLeadResponse {
+  job_id?: string
+  job_status?: string
+  job_message?: string
+  error?: string
+}
+
+export interface ProspectLeadResult {
+  jobId: string | null
+  status: string
+  message: string | null
+  error?: string
+}
+
+/**
+ * Start prospecting for a single lead via the IWF workflow.
+ * The backend expects agentContext in the X-SBAgent-Context header.
+ */
+export async function prospectLead(
+  lead: DailyLead
+): Promise<ProspectLeadResult> {
+  // Build the agent context to send in header
+  const agentContext = {
+    lead_id: lead.leadId,
+    lead_name: lead.fullName || `${lead.firstName || ''} ${lead.lastName || ''}`.trim(),
+    lead_title: lead.title || lead.headline,
+    lead_linkedin: lead.linkedinUrl,
+    lead_email: null,
+    lead_company: lead.company,
+    // Include profile picture for display in prospecting tab
+    lead_profile_picture: lead.profilePictureUrl || lead.profile?.profile_picture_url || null,
+  }
+
+  const response = await callSalesboxApi<ProspectLeadResponse>(
+    '/mcp/prospect-lead',
+    {
+      method: 'POST',
+      body: JSON.stringify({}), // Empty body - ChatCtxDTO not needed for this call
+      headers: {
+        'X-SBAgent-Context': JSON.stringify(agentContext),
+      },
+    }
+  )
+
+  if (response.error || !response.data) {
+    return {
+      jobId: null,
+      status: 'ERROR',
+      message: null,
+      error: response.error || 'Failed to start prospecting',
+    }
+  }
+
+  // Check if the job_status is ERROR
+  if (response.data.job_status === 'ERROR') {
+    return {
+      jobId: response.data.job_id || null,
+      status: 'ERROR',
+      message: null,
+      error: response.data.job_message || 'Prospecting failed',
+    }
+  }
+
+  return {
+    jobId: response.data.job_id || null,
+    status: response.data.job_status || 'RUNNING',
+    message: response.data.job_message || null,
+  }
 }

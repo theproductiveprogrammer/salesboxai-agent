@@ -221,9 +221,9 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
       <div className="p-5 bg-primary/[0.02] border-b border-border/50">
         <div className="flex items-start gap-4">
           {/* Profile picture or initials */}
-          {result?.profile?.profile_picture_url ? (
+          {(result?.profile?.profile_picture_url || (input as any)?.lead_profile_picture) ? (
             <img
-              src={result.profile.profile_picture_url}
+              src={result?.profile?.profile_picture_url || (input as any)?.lead_profile_picture}
               alt={getLeadDisplayName()}
               className="w-16 h-16 rounded-full object-cover border-2 border-primary/30"
             />

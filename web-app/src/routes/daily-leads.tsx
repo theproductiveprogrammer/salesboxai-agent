@@ -16,9 +16,8 @@ import { toast } from 'sonner'
 import { useSalesboxEndpoint } from '@/hooks/useSalesboxEndpoint'
 import {
   getDailyLeads,
-  addLeadsToQueue,
-  startQueueProspecting,
   fetchLeadProfile,
+  prospectLead,
 } from '@/services/dailyLeads'
 import { DailyLeadsGrid } from '@/containers/dailyLeads'
 import type { DailyLead } from '@/types/dailyLeads'
@@ -108,27 +107,25 @@ function DailyLeadsPage() {
     }
   }
 
-  // Prospect a single lead (add to queue and start)
+  // Prospect a single lead via IWF workflow
   const handleProspect = async (lead: DailyLead) => {
     if (!lead.linkedinUrl) {
       toast.error('No LinkedIn URL for this lead')
       return
     }
 
+    if (!lead.leadId) {
+      toast.error('Lead must be saved before prospecting. Try fetching the profile first.')
+      return
+    }
+
     setProspectingIds((prev) => new Set(prev).add(lead.id))
 
     try {
-      // Add to queue
-      const addResponse = await addLeadsToQueue([lead.linkedinUrl])
-      if (addResponse.error) {
-        toast.error(addResponse.error)
-        return
-      }
+      const result = await prospectLead(lead)
 
-      // Start prospecting
-      const startResponse = await startQueueProspecting()
-      if (startResponse.error) {
-        toast.error(startResponse.error)
+      if (result.error) {
+        toast.error(result.error)
         return
       }
 
