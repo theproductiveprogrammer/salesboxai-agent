@@ -5,6 +5,7 @@ import {
   deleteMessage as deleteMessageExt,
 } from '@/services/messages'
 import { useAssistant } from './useAssistant'
+import { useSalesbot } from './useSalesbot'
 
 type MessageState = {
   messages: Record<string, ThreadMessage[]>
@@ -37,16 +38,23 @@ export const useMessages = create<MessageState>()(
   addMessage: (message) => {
     const assistants = useAssistant.getState().assistants
     const currentAssistant = useAssistant.getState().currentAssistant
+    const salesbot = useSalesbot.getState().salesbot
 
     const selectedAssistant =
       assistants.find((a) => a.id === currentAssistant.id) || assistants[0]
+
+    // Use salesbot name if available, otherwise fall back to assistant name
+    const assistantWithSalesbotName = {
+      ...selectedAssistant,
+      name: salesbot?.name || selectedAssistant.name,
+    }
 
     const newMessage = {
       ...message,
       created_at: message.created_at || Date.now(),
       metadata: {
         ...message.metadata,
-        assistant: selectedAssistant,
+        assistant: assistantWithSalesbotName,
       },
     }
 

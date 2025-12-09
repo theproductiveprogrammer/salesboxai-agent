@@ -39,7 +39,7 @@ export const defaultAssistant: Assistant = {
   name: 'SalesboxAI Agent',
   created_at: 1747029866.542,
   parameters: {},
-  avatar: '👋',
+  avatar: '/images/assistants/salesboxai.svg',
   description:
     'SalesboxAI Agent is a helpful desktop assistant that can reason through complex tasks and use tools to complete them on the user\'s behalf.',
   instructions:
