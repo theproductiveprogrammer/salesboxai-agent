@@ -13,6 +13,7 @@ interface DailyLeadsViewProps {
   onProspect: (lead: DailyLead) => void
   onDiscard: (lead: DailyLead) => void
   onRemove: (lead: DailyLead) => void
+  onSelect: (lead: DailyLead) => void
   prospectingId?: string
   loadingProfile?: boolean
 }
@@ -23,6 +24,7 @@ export default function DailyLeadsView({
   onProspect,
   onDiscard,
   onRemove,
+  onSelect,
   prospectingId,
   loadingProfile = false,
 }: DailyLeadsViewProps) {
@@ -59,6 +61,7 @@ export default function DailyLeadsView({
                 key={`list-${lead.id}-${index}`}
                 lead={lead}
                 onRemove={onRemove}
+                onSelect={onSelect}
               />
             ))}
           </div>

@@ -31,6 +31,7 @@ function DailyLeadsPage() {
     removeLead,
     getCurrentLead,
     getUpcomingLeads,
+    setCurrentIndex,
   } = useDailyLeadsCache()
 
   // Local UI state
@@ -161,6 +162,14 @@ function DailyLeadsPage() {
     }
   }, [removeLead])
 
+  // Select a lead from the list to make it the current card
+  const handleSelect = useCallback((lead: DailyLead) => {
+    const index = leads.findIndex((l) => l.id === lead.id)
+    if (index !== -1) {
+      setCurrentIndex(index)
+    }
+  }, [leads, setCurrentIndex])
+
   // Show loading only on initial fetch (not when we have cached data)
   const showLoading = isFetching && leads.length === 0
 
@@ -206,6 +215,7 @@ function DailyLeadsPage() {
             onProspect={handleProspect}
             onDiscard={handleDiscard}
             onRemove={handleRemove}
+            onSelect={handleSelect}
             prospectingId={prospectingId ?? undefined}
             loadingProfile={fetchingProfileId === currentLead?.id}
           />

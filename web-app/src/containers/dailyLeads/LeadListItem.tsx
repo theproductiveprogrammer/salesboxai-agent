@@ -14,15 +14,21 @@ import type { DailyLead } from '@/types/dailyLeads'
 interface LeadListItemProps {
   lead: DailyLead
   onRemove?: (lead: DailyLead) => void
+  onSelect?: (lead: DailyLead) => void
 }
 
 export default function LeadListItem({
   lead,
   onRemove,
+  onSelect,
 }: LeadListItemProps) {
   const handleRemove = (e: React.MouseEvent) => {
     e.stopPropagation()
     onRemove?.(lead)
+  }
+
+  const handleSelect = () => {
+    onSelect?.(lead)
   }
 
   const displayName = lead.fullName || `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Unknown'
@@ -41,7 +47,10 @@ export default function LeadListItem({
   const locationLine = lead.location
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50 transition-colors">
+    <div
+      className="flex items-center gap-4 px-4 py-3 hover:bg-muted/50 transition-colors cursor-pointer"
+      onClick={handleSelect}
+    >
       {/* Main content */}
       <div className="flex-1 min-w-0">
         {/* Line 1: Title - Company (Industry) */}
@@ -72,7 +81,7 @@ export default function LeadListItem({
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={() => openUrl(linkedinUrl)}
+            onClick={(e) => { e.stopPropagation(); openUrl(linkedinUrl) }}
             title="View LinkedIn Profile"
           >
             <IconBrandLinkedin className="h-4 w-4 text-[#0A66C2]" />
