@@ -113,11 +113,6 @@ export default function ProfileCard({
                   Premium
                 </Badge>
               )}
-              {profile?.is_open_profile && (
-                <Badge variant="outline" className="text-xs bg-green-500/10 text-green-600 border-green-500/20">
-                  Open
-                </Badge>
-              )}
             </div>
           </div>
         </div>
