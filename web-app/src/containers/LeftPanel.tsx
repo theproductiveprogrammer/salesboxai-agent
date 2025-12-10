@@ -58,14 +58,14 @@ const mainMenus = [
 		route: route.dailyLeads,
 	},
 	{
-		title: 'common:visitors',
-		icon: IconUsers,
-		route: route.visitors,
-	},
-	{
 		title: 'common:prospecting',
 		icon: IconTargetArrow,
 		route: route.prospecting,
+	},
+	{
+		title: 'common:visitors',
+		icon: IconUsers,
+		route: route.visitors,
 	},
 	{
 		title: 'common:asyncJobs',

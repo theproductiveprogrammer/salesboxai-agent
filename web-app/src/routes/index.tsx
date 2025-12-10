@@ -5,7 +5,6 @@ import HeaderPage from '@/containers/HeaderPage'
 import { useTranslation } from '@/i18n/react-i18next-compat'
 import { useTools } from '@/hooks/useTools'
 import {
-  IconSearch,
   IconUserSearch,
   IconMail,
   IconTargetArrow,
@@ -49,13 +48,6 @@ function Index() {
   }, [setCurrentThreadId])
 
   const suggestedActions = [
-    {
-      icon: IconSearch,
-      label: 'Discover leads',
-      prompt: 'Please find find leads from: ',
-      color: 'text-primary',
-      bgColor: 'bg-primary/10 hover:bg-primary/15',
-    },
     {
       icon: IconUserSearch,
       label: 'Find lead information',

@@ -7,10 +7,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import {
   IconRefresh,
-  IconSearch,
   IconLoader2,
   IconUsers,
 } from '@tabler/icons-react'
@@ -37,7 +35,6 @@ function DailyLeadsPage() {
 
   // Local UI state
   const [refreshing, setRefreshing] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
   const [prospectingId, setProspectingId] = useState<string | null>(null)
   const [fetchingProfileId, setFetchingProfileId] = useState<string | null>(null)
 
@@ -164,24 +161,8 @@ function DailyLeadsPage() {
     }
   }, [removeLead])
 
-  // Filter leads by search term (client-side)
-  const filteredLeads = leads.filter((lead) => {
-    if (!searchTerm) return true
-    const searchLower = searchTerm.toLowerCase()
-    return (
-      lead.fullName?.toLowerCase().includes(searchLower) ||
-      lead.firstName?.toLowerCase().includes(searchLower) ||
-      lead.lastName?.toLowerCase().includes(searchLower) ||
-      lead.company?.toLowerCase().includes(searchLower) ||
-      lead.title?.toLowerCase().includes(searchLower)
-    )
-  })
-
   // Show loading only on initial fetch (not when we have cached data)
   const showLoading = isFetching && leads.length === 0
-
-  // Get current lead from filtered list if searching
-  const displayCurrentLead = searchTerm ? filteredLeads[0] ?? null : currentLead
 
   return (
     <div className="h-full flex flex-col bg-main-view">
@@ -205,19 +186,6 @@ function DailyLeadsPage() {
         </Button>
       </div>
 
-      {/* Search */}
-      <div className="px-6 py-4 border-b border-main-view-fg/10">
-        <div className="relative max-w-md">
-          <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-main-view-fg/40" />
-          <Input
-            placeholder="Search by name, title, or company..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
       {/* Main Content */}
       <div className="flex-1 overflow-auto px-6 py-6">
         {showLoading ? (
@@ -225,27 +193,21 @@ function DailyLeadsPage() {
             <IconLoader2 className="h-8 w-8 animate-spin text-primary" />
             <span className="ml-3 text-main-view-fg/60">Loading daily leads...</span>
           </div>
-        ) : filteredLeads.length === 0 && leads.length === 0 ? (
+        ) : leads.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-main-view-fg/50">
             <IconUsers className="h-12 w-12 mb-3" />
             <p className="font-medium text-lg">No leads available</p>
             <p className="text-sm mt-1">Check back tomorrow for new prospects</p>
           </div>
-        ) : filteredLeads.length === 0 && searchTerm ? (
-          <div className="flex flex-col items-center justify-center h-48 text-main-view-fg/50">
-            <IconUsers className="h-12 w-12 mb-3" />
-            <p className="font-medium text-lg">No leads found</p>
-            <p className="text-sm mt-1">Try adjusting your search</p>
-          </div>
         ) : (
           <DailyLeadsView
-            leads={filteredLeads}
-            currentLead={displayCurrentLead}
+            leads={leads}
+            currentLead={currentLead}
             onProspect={handleProspect}
             onDiscard={handleDiscard}
             onRemove={handleRemove}
             prospectingId={prospectingId ?? undefined}
-            loadingProfile={fetchingProfileId === displayCurrentLead?.id}
+            loadingProfile={fetchingProfileId === currentLead?.id}
           />
         )}
       </div>

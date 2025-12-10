@@ -1,19 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Card, CardContent } from '@/components/ui/card'
 import {
   IconRefresh,
-  IconSearch,
-  IconPlus,
   IconLoader2,
   IconAlertCircle,
-  IconCircle,
-  IconX,
   IconTargetArrow,
   IconExternalLink,
 } from '@tabler/icons-react'
@@ -57,9 +50,6 @@ function AsyncJobsPage() {
   const [jobs, setJobs] = useState<AsyncJob[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
-  const [searchTerm, setSearchTerm] = useState('')
-  const [statusFilter, setStatusFilter] = useState<AsyncJobStatus | 'all'>('all')
-  const [typeFilter, setTypeFilter] = useState<AsyncJobType | 'all'>('all')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
   const [pollingJobs, setPollingJobs] = useState<Set<string>>(new Set())
@@ -86,9 +76,7 @@ function AsyncJobsPage() {
       const response = await getAsyncJobs(
         endpoint,
         currentPage,
-        20,
-        statusFilter === 'all' ? undefined : statusFilter,
-        typeFilter === 'all' ? undefined : typeFilter
+        20
       )
 
       if (reset) {
@@ -106,7 +94,7 @@ function AsyncJobsPage() {
       setLoading(false)
       setRefreshing(false)
     }
-  }, [endpoint, page, statusFilter, typeFilter])
+  }, [endpoint, page])
 
   const refreshJobs = useCallback(() => {
     loadJobs(true)
@@ -203,36 +191,10 @@ function AsyncJobsPage() {
     runningJobs.forEach(job => startPolling(job.id))
   }, [jobs, startPolling])
 
-  // Load jobs on mount and when filters change
+  // Load jobs on mount
   useEffect(() => {
     loadJobs(true)
-  }, [statusFilter, typeFilter])
-
-  const filteredJobs = jobs.filter(job => {
-    if (searchTerm && !job.title.toLowerCase().includes(searchTerm.toLowerCase())) {
-      return false
-    }
-    return true
-  })
-
-  const getStatusCounts = () => {
-    const counts = {
-      all: jobs.length,
-      [JobStatus.RUNNING]: 0,
-      [JobStatus.SUCCESS]: 0,
-      [JobStatus.ERROR]: 0,
-      [JobStatus.FAILED]: 0,
-      [JobStatus.CANCELLED]: 0,
-    }
-
-    jobs.forEach(job => {
-      counts[job.status]++
-    })
-
-    return counts
-  }
-
-  const statusCounts = getStatusCounts()
+  }, [])
 
   const renderJobWidget = (job: AsyncJob) => {
     switch (job.type) {
@@ -315,99 +277,16 @@ function AsyncJobsPage() {
             Monitor and manage your background jobs
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="default"
-            size="sm"
-            onClick={refreshJobs}
-            disabled={refreshing}
-            className="gap-2"
-          >
-            <IconRefresh className={cn("h-4 w-4", refreshing && "animate-spin")} />
-            Refresh
-          </Button>
-          <Button size="sm" className="gap-2">
-            <IconPlus className="h-4 w-4" />
-            New Job
-          </Button>
-        </div>
-      </div>
-
-      {/* Filters and Search */}
-      <div className="px-6 py-4 border-b border-border/50 space-y-4">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-sm">
-            <IconSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-main-view-fg/50" />
-            <Input
-              placeholder="Search jobs..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-          <Select value={statusFilter} onValueChange={(value) => setStatusFilter(value as AsyncJobStatus | 'all')}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value={JobStatus.RUNNING}>Running</SelectItem>
-              <SelectItem value={JobStatus.SUCCESS}>Success</SelectItem>
-              <SelectItem value={JobStatus.ERROR}>Error</SelectItem>
-              <SelectItem value={JobStatus.FAILED}>Failed</SelectItem>
-              <SelectItem value={JobStatus.CANCELLED}>Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={typeFilter} onValueChange={(value) => setTypeFilter(value as AsyncJobType | 'all')}>
-            <SelectTrigger className="w-40">
-              <SelectValue placeholder="Type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Types</SelectItem>
-              <SelectItem value={JobType.DATA_EXPORT}>Data Export</SelectItem>
-              <SelectItem value={JobType.REPORT_GENERATION}>Report Generation</SelectItem>
-              <SelectItem value={JobType.BULK_OPERATION}>Bulk Operation</SelectItem>
-              <SelectItem value={JobType.DISCOVER_LEADS}>Lead Discovery</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      {/* Status Tabs */}
-      <div className="px-6 pt-4">
-        <Tabs value={statusFilter} onValueChange={(value) => setStatusFilter(value as AsyncJobStatus | 'all')}>
-          <TabsList className="grid w-full grid-cols-6">
-            <TabsTrigger value="all" className="flex items-center gap-2">
-              All
-              <Badge variant="secondary">{statusCounts.all}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value={JobStatus.RUNNING} className="flex items-center gap-2">
-              <IconLoader2 className="h-4 w-4" />
-              Running
-              <Badge variant="secondary">{statusCounts[JobStatus.RUNNING]}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value={JobStatus.SUCCESS} className="flex items-center gap-2">
-              <IconCircle className="h-4 w-4" />
-              Success
-              <Badge variant="secondary">{statusCounts[JobStatus.SUCCESS]}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value={JobStatus.ERROR} className="flex items-center gap-2">
-              <IconAlertCircle className="h-4 w-4" />
-              Error
-              <Badge variant="secondary">{statusCounts[JobStatus.ERROR]}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value={JobStatus.FAILED} className="flex items-center gap-2">
-              <IconX className="h-4 w-4" />
-              Failed
-              <Badge variant="secondary">{statusCounts[JobStatus.FAILED]}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value={JobStatus.CANCELLED} className="flex items-center gap-2">
-              <IconAlertCircle className="h-4 w-4" />
-              Cancelled
-              <Badge variant="secondary">{statusCounts[JobStatus.CANCELLED]}</Badge>
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <Button
+          variant="default"
+          size="sm"
+          onClick={refreshJobs}
+          disabled={refreshing}
+          className="gap-2"
+        >
+          <IconRefresh className={cn("h-4 w-4", refreshing && "animate-spin")} />
+          Refresh
+        </Button>
       </div>
 
       {/* Jobs List */}
@@ -417,17 +296,14 @@ function AsyncJobsPage() {
             <IconLoader2 className="h-8 w-8 animate-spin text-primary" />
             <span className="ml-2 text-main-view-fg/70">Loading jobs...</span>
           </div>
-        ) : filteredJobs.length === 0 ? (
+        ) : jobs.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-32 text-main-view-fg/60">
             <IconAlertCircle className="h-8 w-8 mb-2" />
             <p className="font-medium">No jobs found</p>
-            {searchTerm && (
-              <p className="text-sm mt-1">Try adjusting your search or filters</p>
-            )}
           </div>
         ) : (
           <div className="space-y-5 max-w-4xl mx-auto pb-6">
-            {filteredJobs.map(renderJobWidget)}
+            {jobs.map(renderJobWidget)}
             {hasMore && (
               <div className="flex justify-center pt-4">
                 <Button
