@@ -8,13 +8,21 @@ interface DailyLeadsCacheState {
   lastFetchTime: number | null // timestamp
   isFetching: boolean
   fetchPromise: Promise<DailyLead[]> | null
+  currentIndex: number // Track which lead is shown as "current card"
 
   // Actions
   setLeads: (leads: DailyLead[], date: string) => void
   updateLead: (leadId: string, updates: Partial<DailyLead>) => void
+  removeLead: (leadId: string) => void
   clearCache: () => void
   isCacheValid: () => boolean
   fetchLeads: (force?: boolean) => Promise<DailyLead[]>
+
+  // Swipe card navigation
+  getCurrentLead: () => DailyLead | null
+  getUpcomingLeads: (count: number) => DailyLead[]
+  nextLead: () => void
+  setCurrentIndex: (index: number) => void
 }
 
 /**
@@ -28,12 +36,14 @@ export const useDailyLeadsCache = create<DailyLeadsCacheState>((set, get) => ({
   lastFetchTime: null,
   isFetching: false,
   fetchPromise: null,
+  currentIndex: 0,
 
   setLeads: (leads, date) => {
     set({
       leads,
       date,
       lastFetchTime: Date.now(),
+      currentIndex: 0, // Reset to first lead when leads are refreshed
     })
   },
 
@@ -45,11 +55,21 @@ export const useDailyLeadsCache = create<DailyLeadsCacheState>((set, get) => ({
     }))
   },
 
+  removeLead: (leadId) => {
+    set((state) => {
+      const newLeads = state.leads.filter((lead) => lead.id !== leadId)
+      // Adjust currentIndex if needed
+      const newIndex = Math.min(state.currentIndex, Math.max(0, newLeads.length - 1))
+      return { leads: newLeads, currentIndex: newIndex }
+    })
+  },
+
   clearCache: () => {
     set({
       leads: [],
       date: null,
       lastFetchTime: null,
+      currentIndex: 0,
     })
   },
 
@@ -112,5 +132,28 @@ export const useDailyLeadsCache = create<DailyLeadsCacheState>((set, get) => ({
     set({ fetchPromise: fetchPromise })
 
     return fetchPromise
+  },
+
+  // Swipe card navigation
+  getCurrentLead: () => {
+    const { leads, currentIndex } = get()
+    return leads[currentIndex] ?? null
+  },
+
+  getUpcomingLeads: (count: number) => {
+    const { leads, currentIndex } = get()
+    return leads.slice(currentIndex + 1, currentIndex + 1 + count)
+  },
+
+  nextLead: () => {
+    set((state) => ({
+      currentIndex: Math.min(state.currentIndex + 1, state.leads.length - 1),
+    }))
+  },
+
+  setCurrentIndex: (index: number) => {
+    set((state) => ({
+      currentIndex: Math.max(0, Math.min(index, state.leads.length - 1)),
+    }))
   },
 }))
