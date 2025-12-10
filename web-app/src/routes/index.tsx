@@ -51,8 +51,10 @@ function Index() {
           try {
             console.log('[Splash] Fetching profile for lead:', firstLead.leadId)
             const response = await fetchLeadProfile(firstLead.leadId)
-            console.log('[Splash] Profile fetched:', !!response.profile)
-            if (!('error' in response) && response.profile) {
+            if ('error' in response) {
+              console.log('[Splash] Profile fetch error:', response.error)
+            } else if (response.profile) {
+              console.log('[Splash] Profile fetched successfully')
               updateLead(firstLead.id, { profile: response.profile, posts: response.posts })
             }
           } catch (error) {
