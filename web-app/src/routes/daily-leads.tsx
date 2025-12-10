@@ -16,7 +16,7 @@ import {
 } from '@tabler/icons-react'
 import { toast } from 'sonner'
 import { useDailyLeadsCache } from '@/hooks/useDailyLeadsCache'
-import { fetchLeadProfile, prospectLead } from '@/services/dailyLeads'
+import { fetchLeadProfile, prospectLead, removeDailyLead } from '@/services/dailyLeads'
 import { DailyLeadsView } from '@/containers/dailyLeads'
 import type { DailyLead } from '@/types/dailyLeads'
 
@@ -102,10 +102,18 @@ function DailyLeadsPage() {
     }
   }, [fetchLeads])
 
-  // Discard a lead (remove from list)
-  const handleDiscard = useCallback((lead: DailyLead) => {
+  // Discard a lead (remove from list and backend)
+  const handleDiscard = useCallback(async (lead: DailyLead) => {
+    // Remove from frontend immediately for snappy UX
     removeLead(lead.id)
     toast.success(`Discarded ${lead.fullName || lead.firstName || 'lead'}`)
+
+    // Remove from backend (fire-and-forget, don't block UI)
+    if (lead.leadId) {
+      removeDailyLead(lead.leadId).catch((error) => {
+        console.error('Failed to remove lead from backend:', error)
+      })
+    }
   }, [removeLead])
 
   // Prospect a lead and move to next
@@ -145,7 +153,15 @@ function DailyLeadsPage() {
 
   // Remove a lead from the list (same as discard)
   const handleRemove = useCallback((lead: DailyLead) => {
+    // Remove from frontend immediately
     removeLead(lead.id)
+
+    // Remove from backend (fire-and-forget)
+    if (lead.leadId) {
+      removeDailyLead(lead.leadId).catch((error) => {
+        console.error('Failed to remove lead from backend:', error)
+      })
+    }
   }, [removeLead])
 
   // Filter leads by search term (client-side)

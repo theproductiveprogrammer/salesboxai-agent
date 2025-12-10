@@ -221,3 +221,28 @@ export async function prospectLead(
     message: response.data.job_message || null,
   }
 }
+
+/**
+ * Remove a lead from the daily leads list (backend removal)
+ */
+export async function removeDailyLead(
+  leadId: number
+): Promise<{ success: boolean; error?: string }> {
+  const response = await callSalesboxApi<{ leadId?: number; error?: string }>(
+    '/mcp/daily-leads/remove',
+    {
+      method: 'POST',
+      body: JSON.stringify({ id: leadId }),
+    }
+  )
+
+  if (response.error || !response.data) {
+    return { success: false, error: response.error || 'Failed to remove lead' }
+  }
+
+  if (response.data.error) {
+    return { success: false, error: response.data.error }
+  }
+
+  return { success: true }
+}
