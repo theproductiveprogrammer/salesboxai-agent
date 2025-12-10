@@ -18,6 +18,9 @@ pub enum RunningServiceEnum {
 }
 pub type SharedMcpServers = Arc<Mutex<HashMap<String, RunningServiceEnum>>>;
 
+/// Tool list cached permanently per server (fetched once on startup, never expires)
+pub type ToolCache = Arc<Mutex<HashMap<String, Vec<Tool>>>>;
+
 #[derive(Default)]
 pub struct AppState {
     pub app_token: Option<String>,
@@ -28,6 +31,8 @@ pub struct AppState {
     pub mcp_successfully_connected: Arc<Mutex<HashMap<String, bool>>>,
     pub server_handle: Arc<Mutex<Option<ServerHandle>>>,
     pub tool_call_cancellations: Arc<Mutex<HashMap<String, oneshot::Sender<()>>>>,
+    /// Cache of tool lists per server with timestamp for TTL-based expiration (5 min)
+    pub mcp_tool_cache: ToolCache,
 }
 
 impl RunningServiceEnum {

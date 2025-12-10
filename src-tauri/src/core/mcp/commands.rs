@@ -1,8 +1,6 @@
-use rmcp::model::{CallToolRequestParam, CallToolResult};
+use rmcp::model::{CallToolRequestParam, CallToolResult, Content};
 use serde_json::{Map, Value};
-//use std::sync::OnceLock;
 use tauri::{AppHandle, Emitter, Runtime, State};
-//use tokio::sync::Mutex as TokioMutex;
 use tokio::time::timeout;
 use tokio::sync::oneshot;
 
@@ -16,9 +14,6 @@ use crate::core::{
     state::{RunningServiceEnum, SharedMcpServers},
 };
 use std::fs;
-
-/// Global mutex to prevent concurrent reinitialization of MCP servers
-// static REINIT_LOCK: OnceLock<TokioMutex<()>> = OnceLock::new();
 
 #[tauri::command]
 pub async fn activate_mcp_server<R: Runtime>(
@@ -310,20 +305,38 @@ pub async fn call_tool(
         // Iterate through servers and find the first one that contains the tool
         for (server_name, service) in servers.iter() {
             log::info!("Checking server {} for tool {}", server_name, tool_name);
-            let tools = match service.list_all_tools().await {
-                Ok(tools) => tools,
-                Err(e) => {
-                    let err_str = e.to_string();
-                    log::warn!("Failed to list tools from server {}: {}", server_name, err_str);
-                    // If this looks like a transport error and we can retry, schedule reconnect
-                    if attempt < max_attempts && is_transport_error(&err_str) {
-                        log::info!("Transport error detected for server {}, will attempt reconnection", server_name);
-                        reconnect_server = Some(server_name.clone());
-                        last_error = Some(err_str);
-                        drop(servers); // Release lock before reconnect loop
-                        break; // Break inner loop to trigger reconnect in outer loop
+
+            // Check cache first for this server's tools (permanent cache, never expires)
+            let cached_tools = {
+                let cache = state.mcp_tool_cache.lock().await;
+                cache.get(server_name).cloned()
+            };
+
+            let tools = if let Some(cached) = cached_tools {
+                log::debug!("Using cached tool list for server {} ({} tools)", server_name, cached.len());
+                cached
+            } else {
+                // First time: fetch and cache permanently
+                match service.list_all_tools().await {
+                    Ok(tools) => {
+                        let mut cache = state.mcp_tool_cache.lock().await;
+                        cache.insert(server_name.clone(), tools.clone());
+                        log::info!("Cached {} tools for server {} (permanent)", tools.len(), server_name);
+                        tools
                     }
-                    continue; // Skip this server if we can't list tools
+                    Err(e) => {
+                        let err_str = e.to_string();
+                        log::warn!("Failed to list tools from server {}: {}", server_name, err_str);
+                        // If this looks like a transport error and we can retry, schedule reconnect
+                        if attempt < max_attempts && is_transport_error(&err_str) {
+                            log::info!("Transport error detected for server {}, will attempt reconnection", server_name);
+                            reconnect_server = Some(server_name.clone());
+                            last_error = Some(err_str);
+                            drop(servers); // Release lock before reconnect loop
+                            break; // Break inner loop to trigger reconnect in outer loop
+                        }
+                        continue; // Skip this server if we can't list tools
+                    }
                 }
             };
 
@@ -391,8 +404,20 @@ pub async fn call_tool(
             return result;
         }
 
-        // If no reconnect scheduled (tool not found), exit the loop
+        // If no reconnect scheduled (tool not found via MCP), try HTTP fallback
         if reconnect_server.is_none() {
+            // Try HTTP fallback for built-in tools before giving up
+            log::info!("Tool {} not found via MCP, attempting HTTP fallback", tool_name);
+            match http_fallback_tool_call(&tool_name, &arguments, &state).await {
+                Ok(result) => {
+                    log::info!("HTTP fallback succeeded for tool {}", tool_name);
+                    return Ok(result);
+                }
+                Err(fallback_err) => {
+                    log::warn!("HTTP fallback also failed for tool {}: {}", tool_name, fallback_err);
+                    // Continue to error below
+                }
+            }
             break;
         }
     }
@@ -417,6 +442,96 @@ fn is_transport_error(error: &str) -> bool {
         "closed",
     ];
     transport_indicators.iter().any(|indicator| error.contains(indicator))
+}
+
+/// Maps MCP tool names to their HTTP REST API endpoints in salesboxai-core
+fn get_http_fallback_endpoint(tool_name: &str) -> Option<&'static str> {
+    match tool_name {
+        "prospect_lead" => Some("/mcp/prospect-lead"),
+        "send_email" => Some("/mcp/send-email"),
+        "get_lead_info" => Some("/mcp/lead-info"),
+        "find_leads" => Some("/mcp/discover-leads"),
+        "list_jobs" => Some("/mcp/job-list"),
+        "get_job_info" => Some("/mcp/job-status"),
+        "delete_job" => Some("/mcp/job-delete"),
+        "cancel_job" => Some("/mcp/job-cancel"),
+        "retry_job" => Some("/mcp/job-retry"),
+        "send_linkedin_message" => Some("/mcp/send-linkedin-message"),
+        "comment_on_linkedin_post" => Some("/mcp/comment-on-post"),
+        "react_to_linkedin_post" => Some("/mcp/react-to-post"),
+        _ => None,
+    }
+}
+
+/// Attempts to call a tool via direct HTTP REST API as a fallback when MCP fails.
+/// This ensures tools remain available even when MCP connection is unstable.
+async fn http_fallback_tool_call(
+    tool_name: &str,
+    arguments: &Option<Map<String, Value>>,
+    state: &AppState,
+) -> Result<CallToolResult, String> {
+    let endpoint = get_http_fallback_endpoint(tool_name)
+        .ok_or_else(|| format!("No HTTP fallback available for tool {}", tool_name))?;
+
+    // Get the API endpoint and auth header from the active servers config (salesboxai-builtin)
+    // Clone the values we need before releasing the lock
+    let (full_url, auth_header) = {
+        let active_servers = state.mcp_active_servers.lock().await;
+        let builtin_config = active_servers.get("salesboxai-builtin")
+            .ok_or_else(|| "salesboxai-builtin server not configured".to_string())?;
+
+        // Extract the base URL from the MCP config
+        let mcp_url = builtin_config.get("url")
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| "MCP URL not found in config".to_string())?;
+
+        // Convert MCP URL to REST API URL (remove /mcp suffix if present)
+        let base_url = mcp_url.trim_end_matches("/mcp");
+        let full_url = format!("{}{}", base_url, endpoint);
+
+        // Get auth token from headers
+        let auth_header = builtin_config.get("headers")
+            .and_then(|h| h.get("Authorization"))
+            .and_then(|v| v.as_str())
+            .ok_or_else(|| "Authorization header not found".to_string())?
+            .to_string();
+
+        (full_url, auth_header)
+    }; // Lock released here
+
+    log::info!("HTTP fallback: calling {} for tool {}", full_url, tool_name);
+
+    // Build request body from arguments
+    let body = arguments.clone().map(|args| serde_json::Value::Object(args))
+        .unwrap_or(serde_json::Value::Object(Map::new()));
+
+    // Make HTTP POST request
+    let client = reqwest::Client::new();
+    let response = client
+        .post(&full_url)
+        .header("Authorization", auth_header)
+        .header("Content-Type", "application/json")
+        .json(&body)
+        .send()
+        .await
+        .map_err(|e| format!("HTTP fallback request failed: {}", e))?;
+
+    let status = response.status();
+    let response_text = response.text().await
+        .map_err(|e| format!("Failed to read HTTP fallback response: {}", e))?;
+
+    if !status.is_success() {
+        log::error!("HTTP fallback failed with status {}: {}", status, response_text);
+        return Err(format!("HTTP fallback failed with status {}: {}", status, response_text));
+    }
+
+    log::info!("HTTP fallback succeeded for tool {}", tool_name);
+
+    Ok(CallToolResult {
+        content: vec![Content::text(response_text)],
+        is_error: Some(false),
+        structured_content: None,
+    })
 }
 
 /// Cancels a running tool call by its cancellation token
