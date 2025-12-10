@@ -50,7 +50,7 @@ const mainMenus = [
 	{
 		title: 'common:newChat',
 		icon: IconCirclePlusFilled,
-		route: route.home,
+		route: route.chat,
 	},
 	{
 		title: 'common:dailyLeads',

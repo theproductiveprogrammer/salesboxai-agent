@@ -21,6 +21,7 @@ import DiscardIcon from '@/assets/icons/discard.svg'
 import ProspectIcon from '@/assets/icons/prospect.svg'
 import { cn } from '@/lib/utils'
 import { openUrl } from '@tauri-apps/plugin-opener'
+import { useNavigate } from '@tanstack/react-router'
 import type { DailyLead } from '@/types/dailyLeads'
 
 interface SwipeCardProps {
@@ -72,14 +73,24 @@ function SwipeCardSkeleton() {
 }
 
 function EmptyState() {
+  const navigate = useNavigate()
+
   return (
     <Card className="overflow-hidden border-main-view-fg/10">
       <CardContent className="p-12 text-center">
         <div className="text-5xl mb-4">🎉</div>
         <h3 className="text-xl font-bold text-main-view-fg mb-2">All done for today!</h3>
-        <p className="text-main-view-fg/60">
+        <p className="text-main-view-fg/60 mb-6">
           You've reviewed all your daily leads. Check back tomorrow for fresh prospects.
         </p>
+        <Button
+          variant="outline"
+          onClick={() => navigate({ to: '/chat' })}
+          className="gap-2"
+        >
+          <IconUserPlus className="h-4 w-4" />
+          Start New Chat
+        </Button>
       </CardContent>
     </Card>
   )

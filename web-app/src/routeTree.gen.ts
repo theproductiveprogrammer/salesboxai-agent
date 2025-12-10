@@ -15,6 +15,7 @@ import { Route as SystemMonitorImport } from './routes/system-monitor'
 import { Route as ProspectingImport } from './routes/prospecting'
 import { Route as LogsImport } from './routes/logs'
 import { Route as DailyLeadsImport } from './routes/daily-leads'
+import { Route as ChatImport } from './routes/chat'
 import { Route as AsyncJobsImport } from './routes/async-jobs'
 import { Route as AssistantImport } from './routes/assistant'
 import { Route as IndexImport } from './routes/index'
@@ -58,6 +59,12 @@ const LogsRoute = LogsImport.update({
 const DailyLeadsRoute = DailyLeadsImport.update({
   id: '/daily-leads',
   path: '/daily-leads',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const ChatRoute = ChatImport.update({
+  id: '/chat',
+  path: '/chat',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -199,6 +206,13 @@ declare module '@tanstack/react-router' {
       path: '/async-jobs'
       fullPath: '/async-jobs'
       preLoaderRoute: typeof AsyncJobsImport
+      parentRoute: typeof rootRoute
+    }
+    '/chat': {
+      id: '/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof ChatImport
       parentRoute: typeof rootRoute
     }
     '/daily-leads': {
@@ -350,6 +364,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/async-jobs': typeof AsyncJobsRoute
+  '/chat': typeof ChatRoute
   '/daily-leads': typeof DailyLeadsRoute
   '/logs': typeof LogsRoute
   '/prospecting': typeof ProspectingRoute
@@ -376,6 +391,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/async-jobs': typeof AsyncJobsRoute
+  '/chat': typeof ChatRoute
   '/daily-leads': typeof DailyLeadsRoute
   '/logs': typeof LogsRoute
   '/prospecting': typeof ProspectingRoute
@@ -403,6 +419,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/assistant': typeof AssistantRoute
   '/async-jobs': typeof AsyncJobsRoute
+  '/chat': typeof ChatRoute
   '/daily-leads': typeof DailyLeadsRoute
   '/logs': typeof LogsRoute
   '/prospecting': typeof ProspectingRoute
@@ -431,6 +448,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/async-jobs'
+    | '/chat'
     | '/daily-leads'
     | '/logs'
     | '/prospecting'
@@ -456,6 +474,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/async-jobs'
+    | '/chat'
     | '/daily-leads'
     | '/logs'
     | '/prospecting'
@@ -481,6 +500,7 @@ export interface FileRouteTypes {
     | '/'
     | '/assistant'
     | '/async-jobs'
+    | '/chat'
     | '/daily-leads'
     | '/logs'
     | '/prospecting'
@@ -508,6 +528,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AssistantRoute: typeof AssistantRoute
   AsyncJobsRoute: typeof AsyncJobsRoute
+  ChatRoute: typeof ChatRoute
   DailyLeadsRoute: typeof DailyLeadsRoute
   LogsRoute: typeof LogsRoute
   ProspectingRoute: typeof ProspectingRoute
@@ -534,6 +555,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AssistantRoute: AssistantRoute,
   AsyncJobsRoute: AsyncJobsRoute,
+  ChatRoute: ChatRoute,
   DailyLeadsRoute: DailyLeadsRoute,
   LogsRoute: LogsRoute,
   ProspectingRoute: ProspectingRoute,
@@ -569,6 +591,7 @@ export const routeTree = rootRoute
         "/",
         "/assistant",
         "/async-jobs",
+        "/chat",
         "/daily-leads",
         "/logs",
         "/prospecting",
@@ -599,6 +622,9 @@ export const routeTree = rootRoute
     },
     "/async-jobs": {
       "filePath": "async-jobs.tsx"
+    },
+    "/chat": {
+      "filePath": "chat.tsx"
     },
     "/daily-leads": {
       "filePath": "daily-leads.tsx"

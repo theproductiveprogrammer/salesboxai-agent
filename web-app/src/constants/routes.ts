@@ -1,6 +1,7 @@
 export const route = {
-  // home as new chat or thread
+  // home is splash screen that redirects to daily leads
   home: '/',
+  chat: '/chat',
   appLogs: '/logs',
   assistant: '/assistant',
   settings: {
