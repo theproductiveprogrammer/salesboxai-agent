@@ -20,6 +20,7 @@ import type { ParsedVisitorConversation } from '@/types/visitors'
 import { route } from '@/constants/routes'
 import { formatRelativeTime } from '@/utils/formatRelativeTime'
 import { useSBAgentContext } from '@/hooks/useSBAgentContext'
+import { toast } from 'sonner'
 
 export const Route = createFileRoute('/visitors/')({
   component: VisitorsPage,
@@ -65,7 +66,7 @@ function VisitorsPage() {
     const info = extractVisitorInfo(visitor.data.content)
 
     if (!info.linkedinUrl) {
-      console.log('No LinkedIn URL found for visitor:', visitor.id)
+      toast.error('LinkedIn profile not available for this visitor')
       return
     }
 

@@ -20,6 +20,7 @@ import {
   IconCheck,
 } from '@tabler/icons-react'
 import { cn } from '@/lib/utils'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import type { DailyLead } from '@/types/dailyLeads'
 
 interface SwipeCardProps {
@@ -217,7 +218,7 @@ export default function SwipeCard({
               variant="ghost"
               size="sm"
               className="text-[#0A66C2] hover:text-[#0A66C2]/80"
-              onClick={() => window.open(linkedinUrl, '_blank')}
+              onClick={() => openUrl(linkedinUrl)}
             >
               <IconBrandLinkedin className="h-4 w-4 mr-2" />
               View on LinkedIn

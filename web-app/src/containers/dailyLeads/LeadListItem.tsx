@@ -8,6 +8,7 @@ import {
   IconX,
   IconBrandLinkedin,
 } from '@tabler/icons-react'
+import { openUrl } from '@tauri-apps/plugin-opener'
 import type { DailyLead } from '@/types/dailyLeads'
 
 interface LeadListItemProps {
@@ -71,7 +72,7 @@ export default function LeadListItem({
             variant="ghost"
             size="icon"
             className="h-8 w-8"
-            onClick={() => window.open(linkedinUrl, '_blank')}
+            onClick={() => openUrl(linkedinUrl)}
             title="View LinkedIn Profile"
           >
             <IconBrandLinkedin className="h-4 w-4 text-[#0A66C2]" />
