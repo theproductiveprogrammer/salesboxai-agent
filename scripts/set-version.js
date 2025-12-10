@@ -27,6 +27,7 @@ const colors = {
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const FILES = {
   cargo: path.join(PROJECT_ROOT, 'src-tauri', 'Cargo.toml'),
+  cargoLock: path.join(PROJECT_ROOT, 'src-tauri', 'Cargo.lock'),
   tauriConf: path.join(PROJECT_ROOT, 'src-tauri', 'tauri.conf.json'),
   webApp: path.join(PROJECT_ROOT, 'web-app', 'package.json'),
 };
@@ -45,6 +46,16 @@ function isValidSemver(version) {
 function getCargoVersion() {
   const content = fs.readFileSync(FILES.cargo, 'utf8');
   const match = content.match(/^version\s*=\s*"([^"]+)"/m);
+  return match ? match[1] : null;
+}
+
+/**
+ * Extract version from Cargo.lock (for SalesboxAIAgent package)
+ */
+function getCargoLockVersion() {
+  const content = fs.readFileSync(FILES.cargoLock, 'utf8');
+  // Match the version line after name = "SalesboxAIAgent"
+  const match = content.match(/name\s*=\s*"SalesboxAIAgent"\s*\nversion\s*=\s*"([^"]+)"/);
   return match ? match[1] : null;
 }
 
@@ -72,6 +83,7 @@ function getWebAppVersion() {
 function getCurrentVersions() {
   return {
     cargo: getCargoVersion(),
+    cargoLock: getCargoLockVersion(),
     tauriConf: getTauriConfVersion(),
     webApp: getWebAppVersion(),
   };
@@ -81,8 +93,8 @@ function getCurrentVersions() {
  * Check if all versions are in sync
  */
 function areVersionsInSync(versions) {
-  const { cargo, tauriConf, webApp } = versions;
-  return cargo === tauriConf && tauriConf === webApp;
+  const { cargo, cargoLock, tauriConf, webApp } = versions;
+  return cargo === cargoLock && cargoLock === tauriConf && tauriConf === webApp;
 }
 
 /**
@@ -94,6 +106,7 @@ function displayVersions() {
 
   console.log(`\n${colors.bright}Current Versions:${colors.reset}`);
   console.log(`  ${colors.cyan}Cargo.toml:${colors.reset}           ${versions.cargo}`);
+  console.log(`  ${colors.cyan}Cargo.lock:${colors.reset}           ${versions.cargoLock}`);
   console.log(`  ${colors.cyan}tauri.conf.json:${colors.reset}      ${versions.tauriConf}`);
   console.log(`  ${colors.cyan}web-app/package.json:${colors.reset} ${versions.webApp}`);
 
@@ -114,6 +127,18 @@ function updateCargoVersion(newVersion) {
     `$1"${newVersion}"`
   );
   fs.writeFileSync(FILES.cargo, content, 'utf8');
+}
+
+/**
+ * Update version in Cargo.lock (for SalesboxAIAgent package)
+ */
+function updateCargoLockVersion(newVersion) {
+  let content = fs.readFileSync(FILES.cargoLock, 'utf8');
+  content = content.replace(
+    /(name\s*=\s*"SalesboxAIAgent"\s*\nversion\s*=\s*)"[^"]+"/,
+    `$1"${newVersion}"`
+  );
+  fs.writeFileSync(FILES.cargoLock, content, 'utf8');
 }
 
 /**
@@ -149,11 +174,13 @@ function updateAllVersions(newVersion) {
   // Show what will change
   console.log('Before:');
   console.log(`  ${colors.cyan}Cargo.toml:${colors.reset}           ${oldVersions.cargo}`);
+  console.log(`  ${colors.cyan}Cargo.lock:${colors.reset}           ${oldVersions.cargoLock}`);
   console.log(`  ${colors.cyan}tauri.conf.json:${colors.reset}      ${oldVersions.tauriConf}`);
   console.log(`  ${colors.cyan}web-app/package.json:${colors.reset} ${oldVersions.webApp}`);
 
   // Update all files
   updateCargoVersion(newVersion);
+  updateCargoLockVersion(newVersion);
   updateTauriConfVersion(newVersion);
   updateWebAppVersion(newVersion);
 
@@ -162,6 +189,7 @@ function updateAllVersions(newVersion) {
 
   console.log('\nAfter:');
   console.log(`  ${colors.cyan}Cargo.toml:${colors.reset}           ${newVersions.cargo}`);
+  console.log(`  ${colors.cyan}Cargo.lock:${colors.reset}           ${newVersions.cargoLock}`);
   console.log(`  ${colors.cyan}tauri.conf.json:${colors.reset}      ${newVersions.tauriConf}`);
   console.log(`  ${colors.cyan}web-app/package.json:${colors.reset} ${newVersions.webApp}`);
 
