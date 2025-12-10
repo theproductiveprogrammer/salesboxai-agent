@@ -50,7 +50,7 @@ const ChatInput = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isFocused, setIsFocused] = useState(false)
   const [rows, setRows] = useState(1)
-  const { streamingContent, abortControllers, tools, cancelToolCall } =
+  const { streamingContent, abortControllers, cancelToolCall } =
     useAppState()
   const { prompt, setPrompt } = usePrompt()
   const { currentThreadId } = useThreads()
@@ -73,7 +73,7 @@ const ChatInput = ({
       dataUrl: string
     }>
   >([])
-  const [connectedServers, setConnectedServers] = useState<string[]>([])
+  const [, setConnectedServers] = useState<string[]>([])
   const [isDragOver, setIsDragOver] = useState(false)
   const [hasMmproj, setHasMmproj] = useState(false)
 
@@ -126,9 +126,7 @@ const ChatInput = ({
     checkMmprojSupport()
   }, [selectedModel?.capabilities, selectedModel?.id, selectedProvider])
 
-  // Check if there are active MCP servers
-  const _hasActiveMCPServers = connectedServers.length > 0 || tools.length > 0
-
+  
   const handleSendMesage = (prompt: string) => {
     console.log('[ChatInput] handleSendMesage called with prompt:', prompt)
     console.log('[ChatInput] selectedModel:', selectedModel)
