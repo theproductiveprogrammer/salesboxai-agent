@@ -35,6 +35,7 @@ import { useSalesbot } from '@/hooks/useSalesbot'
 import { startAutoRefresh, stopAutoRefresh } from '@/services/auth'
 import { LoginDialog } from '@/containers/LoginDialog'
 import { SplashScreen } from '@/containers/SplashScreen'
+import { useDailyLeadsCache } from '@/hooks/useDailyLeadsCache'
 
 export const Route = createRootRoute({
   component: RootLayout,
@@ -261,6 +262,14 @@ function RootLayout() {
       clearSalesbot()
     }
   }, [isAuthenticated, fetchSalesbot, clearSalesbot])
+
+  // Eagerly fetch daily leads on startup (user almost always views this)
+  const { fetchLeads: prefetchDailyLeads } = useDailyLeadsCache()
+  useEffect(() => {
+    if (isAuthenticated) {
+      prefetchDailyLeads()
+    }
+  }, [isAuthenticated, prefetchDailyLeads])
 
   return (
     <Fragment>
