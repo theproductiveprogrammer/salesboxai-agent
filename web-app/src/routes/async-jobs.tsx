@@ -13,7 +13,7 @@ import {
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useSalesboxEndpoint } from '@/hooks/useSalesboxEndpoint'
-import type { AsyncJob, AsyncJobStatus, AsyncJobType } from '@/types/asyncJobs'
+import type { AsyncJob } from '@/types/asyncJobs'
 import { AsyncJobStatus as JobStatus, AsyncJobType as JobType } from '@/types/asyncJobs'
 import {
   getAsyncJobs,

@@ -127,7 +127,7 @@ const ChatInput = ({
   }, [selectedModel?.capabilities, selectedModel?.id, selectedProvider])
 
   // Check if there are active MCP servers
-  const hasActiveMCPServers = connectedServers.length > 0 || tools.length > 0
+  const _hasActiveMCPServers = connectedServers.length > 0 || tools.length > 0
 
   const handleSendMesage = (prompt: string) => {
     console.log('[ChatInput] handleSendMesage called with prompt:', prompt)
