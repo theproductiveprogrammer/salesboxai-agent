@@ -1,138 +1,53 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createFileRoute, useSearch } from '@tanstack/react-router'
-import ChatInput from '@/containers/ChatInput'
-import HeaderPage from '@/containers/HeaderPage'
-import { useTranslation } from '@/i18n/react-i18next-compat'
-import { useTools } from '@/hooks/useTools'
-import {
-  IconUserSearch,
-  IconMail,
-  IconTargetArrow,
-} from '@tabler/icons-react'
-
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { useEffect, useState } from 'react'
+import { useDailyLeadsCache } from '@/hooks/useDailyLeadsCache'
 import { route } from '@/constants/routes'
-
-type SearchParams = {
-  model?: {
-    id: string
-    provider: string
-  }
-  message?: string
-}
-import DropdownAssistant from '@/containers/DropdownAssistant'
-import { useEffect } from 'react'
-import { useThreads } from '@/hooks/useThreads'
-import { useSalesboxAuth } from '@/hooks/useSalesboxAuth'
-import { usePrompt } from '@/hooks/usePrompt'
+import { IconLoader2 } from '@tabler/icons-react'
 
 export const Route = createFileRoute(route.home as any)({
   component: Index,
-  validateSearch: (search: Record<string, unknown>): SearchParams => ({
-    model: search.model as SearchParams['model'],
-    message: search.message as string | undefined,
-  }),
 })
 
 function Index() {
-  const { t } = useTranslation()
-  const search = useSearch({ from: route.home as any })
-  const { setCurrentThreadId } = useThreads()
-  const { user } = useSalesboxAuth()
-  const { setPrompt } = usePrompt()
-  useTools()
+  const navigate = useNavigate()
+  const { fetchLeads, isFetching } = useDailyLeadsCache()
+  const [minDelayPassed, setMinDelayPassed] = useState(false)
 
-  const userName = user?.name || user?.username || 'there'
-
+  // Start prefetching Daily Leads immediately
   useEffect(() => {
-    setCurrentThreadId(undefined)
-  }, [setCurrentThreadId])
+    fetchLeads()
+  }, [fetchLeads])
 
-  const suggestedActions = [
-    {
-      icon: IconUserSearch,
-      label: 'Find lead information',
-      prompt: 'Please find detailed information about this lead: {{lead}}',
-      color: 'text-primary',
-      bgColor: 'bg-accent/30 hover:bg-accent/40',
-    },
-    {
-      icon: IconMail,
-      label: 'Send email',
-      prompt: 'Please send an email to: {{lead}}',
-      color: 'text-primary',
-      bgColor: 'bg-primary/8 hover:bg-primary/12',
-    },
-    {
-      icon: IconTargetArrow,
-      label: 'Prospect Lead',
-      prompt: 'Please start prospecting: {{lead}}',
-      color: 'text-primary',
-      bgColor: 'bg-accent/20 hover:bg-accent/30',
-    },
-  ]
+  // Minimum display time for smooth UX (avoid flash)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setMinDelayPassed(true)
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [])
 
-  // Always show chat interface directly - no splash screen needed
+  // Navigate to Daily Leads once data is ready and minimum time has passed
+  useEffect(() => {
+    if (!isFetching && minDelayPassed) {
+      navigate({ to: '/daily-leads' })
+    }
+  }, [isFetching, minDelayPassed, navigate])
+
   return (
-    <div className="flex h-full flex-col flex-justify-center">
-      <HeaderPage>
-        <DropdownAssistant />
-      </HeaderPage>
-      <div className="h-full px-4 md:px-8 overflow-y-auto flex flex-col gap-2 justify-center">
-        <div className="w-full md:w-4/6 mx-auto">
-          <div className="mb-8 text-center">
-            <h1 className="font-editorialnew text-main-view-fg text-4xl">
-              Hi {userName}!
-            </h1>
-            <p className="text-main-view-fg/70 text-lg mt-2">
-              {t('chat:description')}
-            </p>
-          </div>
+    <div className="flex h-full items-center justify-center bg-main-view">
+      <div className="text-center animate-in fade-in duration-500">
+        {/* Logo */}
+        <img
+          src="/salesbox-logo.png"
+          alt="SalesboxAI"
+          className="h-8 mx-auto mb-6"
+        />
 
-          <div className="flex-1 shrink-0">
-            <ChatInput
-              showSpeedToken={false}
-              initialMessage={true}
-              initialPrompt={search.message}
-              strongBorder={true}
-            />
-          </div>
-
-          {/* Suggested Actions */}
-          <div className="my-6">
-            <div className="flex flex-wrap gap-2 justify-center max-w-3xl mx-auto">
-              {suggestedActions.map((action, index) => (
-                <button
-                  key={index}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg border border-border/20 transition-all ${action.bgColor} cursor-pointer opacity-80 hover:opacity-100`}
-                  onClick={() => {
-                    // Replace {{lead}} placeholder with empty string (user will fill in)
-                    const filledPrompt = action.prompt.replace(
-                      /\{\{lead\}\}/g,
-                      ''
-                    )
-                    setPrompt(filledPrompt)
-
-                    // Focus the textarea after setting the prompt
-                    setTimeout(() => {
-                      const input = document.querySelector(
-                        'textarea'
-                      ) as HTMLTextAreaElement
-                      if (input) {
-                        input.focus()
-                      }
-                    }, 0)
-                  }}
-                >
-                  <action.icon
-                    className={`h-5 w-5 flex-shrink-0 ${action.color}`}
-                  />
-                  <span className="text-sm font-medium whitespace-nowrap">
-                    {action.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
+        {/* Loading indicator */}
+        <div className="flex items-center justify-center gap-2 text-main-view-fg/60">
+          <IconLoader2 className="h-5 w-5 animate-spin" />
+          <span className="text-sm">Loading...</span>
         </div>
       </div>
     </div>
