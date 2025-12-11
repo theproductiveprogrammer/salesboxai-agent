@@ -50,12 +50,12 @@ function getCargoVersion() {
 }
 
 /**
- * Extract version from Cargo.lock (for SalesboxAIAgent package)
+ * Extract version from Cargo.lock (for SalesGenie package)
  */
 function getCargoLockVersion() {
   const content = fs.readFileSync(FILES.cargoLock, 'utf8');
-  // Match the version line after name = "SalesboxAIAgent"
-  const match = content.match(/name\s*=\s*"SalesboxAIAgent"\s*\nversion\s*=\s*"([^"]+)"/);
+  // Match the version line after name = "SalesGenie"
+  const match = content.match(/name\s*=\s*"SalesGenie"\s*\nversion\s*=\s*"([^"]+)"/);
   return match ? match[1] : null;
 }
 
@@ -130,12 +130,12 @@ function updateCargoVersion(newVersion) {
 }
 
 /**
- * Update version in Cargo.lock (for SalesboxAIAgent package)
+ * Update version in Cargo.lock (for SalesGenie package)
  */
 function updateCargoLockVersion(newVersion) {
   let content = fs.readFileSync(FILES.cargoLock, 'utf8');
   content = content.replace(
-    /(name\s*=\s*"SalesboxAIAgent"\s*\nversion\s*=\s*)"[^"]+"/,
+    /(name\s*=\s*"SalesGenie"\s*\nversion\s*=\s*)"[^"]+"/,
     `$1"${newVersion}"`
   );
   fs.writeFileSync(FILES.cargoLock, content, 'utf8');

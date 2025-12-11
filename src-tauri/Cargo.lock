@@ -3,7 +3,7 @@
 version = 3
 
 [[package]]
-name = "SalesboxAIAgent"
+name = "SalesGenie"
 version = "1.0.20"
 dependencies = [
  "chrono",
