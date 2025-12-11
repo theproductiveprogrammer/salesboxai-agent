@@ -10,6 +10,8 @@ export const Route = createFileRoute(route.home as any)({
   component: Index,
 })
 
+const MIN_SPLASH_DURATION = 5000 // 5 seconds minimum
+
 function Index() {
   const navigate = useNavigate()
   const { fetchLeads, isFetching, leads, updateLead } = useDailyLeadsCache()
@@ -72,11 +74,11 @@ function Index() {
     prefetchFirstProfile()
   }, [fetchComplete, leads, profileFetched, updateLead])
 
-  // Minimum display time for smooth UX (avoid flash)
+  // Minimum display time (5 seconds)
   useEffect(() => {
     const timer = setTimeout(() => {
       setMinDelayPassed(true)
-    }, 800)
+    }, MIN_SPLASH_DURATION)
     return () => clearTimeout(timer)
   }, [])
 
@@ -88,19 +90,22 @@ function Index() {
   }, [isFetching, profileFetched, minDelayPassed, navigate])
 
   return (
-    <div className="flex h-full items-center justify-center bg-main-view">
-      <div className="text-center animate-in fade-in duration-500">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-white animate-in fade-in duration-300">
+      <div className="text-center">
         {/* Logo */}
         <img
           src="/salesbox-logo.png"
           alt="SalesboxAI"
-          className="h-8 mx-auto mb-6"
+          className="h-10 mx-auto mb-6"
         />
 
+        {/* Welcome message */}
+        <h1 className="text-2xl font-bold text-[#E755A6] mb-2">Welcome to SalesGenie</h1>
+
         {/* Loading indicator */}
-        <div className="flex items-center justify-center gap-2 text-main-view-fg/60">
+        <div className="flex items-center justify-center gap-2 text-[#151047]/60 mt-4">
           <IconLoader2 className="h-5 w-5 animate-spin" />
-          <span className="text-sm">Loading...</span>
+          <span className="text-sm">Loading your account...</span>
         </div>
       </div>
     </div>

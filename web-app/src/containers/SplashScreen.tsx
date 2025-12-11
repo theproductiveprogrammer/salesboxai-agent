@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -12,19 +12,31 @@ interface SplashScreenProps {
 	onSuccess?: () => void
 }
 
+const MIN_SPLASH_DURATION = 5000 // 5 seconds minimum
+
 export function SplashScreen({ onSuccess }: SplashScreenProps) {
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 	const [showPassword, setShowPassword] = useState(false)
 	const [isLoadingAccount, setIsLoadingAccount] = useState(false)
 	const [dataReady, setDataReady] = useState(false)
+	const [minDelayPassed, setMinDelayPassed] = useState(false)
+	const splashStartTime = useRef<number | null>(null)
 	const { login, isLoading, error: authError } = useSalesboxAuth()
 	const { endpoint, setEndpoint } = useSalesboxEndpoint()
 	const { fetchLeads, updateLead } = useDailyLeadsCache()
 
-	// When isLoadingAccount becomes true, start fetching data
+	// When isLoadingAccount becomes true, start fetching data and timer
 	useEffect(() => {
 		if (!isLoadingAccount) return
+
+		// Record start time for minimum duration
+		splashStartTime.current = Date.now()
+
+		// Start minimum delay timer
+		const timer = setTimeout(() => {
+			setMinDelayPassed(true)
+		}, MIN_SPLASH_DURATION)
 
 		const loadData = async () => {
 			try {
@@ -52,13 +64,23 @@ export function SplashScreen({ onSuccess }: SplashScreenProps) {
 				console.error('[SplashScreen] Failed to fetch leads:', error)
 			}
 
-			// Data is ready (or failed, either way proceed)
-			console.log('[SplashScreen] Data loaded, completing splash')
-			onSuccess?.()
+			// Data is ready
+			console.log('[SplashScreen] Data loaded')
+			setDataReady(true)
 		}
 
 		loadData()
-	}, [isLoadingAccount, fetchLeads, updateLead, onSuccess])
+
+		return () => clearTimeout(timer)
+	}, [isLoadingAccount, fetchLeads, updateLead])
+
+	// Complete splash when both data is ready AND minimum time has passed
+	useEffect(() => {
+		if (dataReady && minDelayPassed) {
+			console.log('[SplashScreen] Both data ready and min delay passed, completing splash')
+			onSuccess?.()
+		}
+	}, [dataReady, minDelayPassed, onSuccess])
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
