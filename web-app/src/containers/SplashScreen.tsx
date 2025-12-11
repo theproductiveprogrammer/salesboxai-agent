@@ -1,9 +1,12 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Eye, EyeOff, LogIn } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { useSalesboxAuth } from '@/hooks/useSalesboxAuth'
 import { useSalesboxEndpoint } from '@/hooks/useSalesboxEndpoint'
+import { useDailyLeadsCache } from '@/hooks/useDailyLeadsCache'
+import { fetchLeadProfile } from '@/services/dailyLeads'
+import { IconLoader2 } from '@tabler/icons-react'
 
 interface SplashScreenProps {
 	onSuccess?: () => void
@@ -13,8 +16,49 @@ export function SplashScreen({ onSuccess }: SplashScreenProps) {
 	const [username, setUsername] = useState('')
 	const [password, setPassword] = useState('')
 	const [showPassword, setShowPassword] = useState(false)
+	const [isLoadingAccount, setIsLoadingAccount] = useState(false)
+	const [dataReady, setDataReady] = useState(false)
 	const { login, isLoading, error: authError } = useSalesboxAuth()
 	const { endpoint, setEndpoint } = useSalesboxEndpoint()
+	const { fetchLeads, updateLead } = useDailyLeadsCache()
+
+	// When isLoadingAccount becomes true, start fetching data
+	useEffect(() => {
+		if (!isLoadingAccount) return
+
+		const loadData = async () => {
+			try {
+				console.log('[SplashScreen] Fetching daily leads...')
+				const leads = await fetchLeads(true) // Force refresh, await the result
+				console.log('[SplashScreen] Got leads:', leads.length)
+
+				// Prefetch first lead's profile if available
+				if (leads.length > 0) {
+					const firstLead = leads[0]
+					if (firstLead.leadId && !firstLead.profile) {
+						try {
+							console.log('[SplashScreen] Fetching profile for lead:', firstLead.leadId)
+							const response = await fetchLeadProfile(firstLead.leadId)
+							if (!('error' in response) && response.profile) {
+								console.log('[SplashScreen] Profile fetched successfully')
+								updateLead(firstLead.id, { profile: response.profile, posts: response.posts })
+							}
+						} catch (error) {
+							console.error('[SplashScreen] Failed to prefetch profile:', error)
+						}
+					}
+				}
+			} catch (error) {
+				console.error('[SplashScreen] Failed to fetch leads:', error)
+			}
+
+			// Data is ready (or failed, either way proceed)
+			console.log('[SplashScreen] Data loaded, completing splash')
+			onSuccess?.()
+		}
+
+		loadData()
+	}, [isLoadingAccount, fetchLeads, updateLead, onSuccess])
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
@@ -31,9 +75,34 @@ export function SplashScreen({ onSuccess }: SplashScreenProps) {
 			setPassword('')
 			setShowPassword(false)
 
-			// Call success callback if provided
-			onSuccess?.()
+			// Start loading account data - this triggers the useEffect above
+			setIsLoadingAccount(true)
 		}
+	}
+
+	// Show loading account screen after successful login
+	if (isLoadingAccount) {
+		return (
+			<div className="fixed inset-0 z-50 flex items-center justify-center bg-white animate-in fade-in duration-300">
+				<div className="text-center">
+					{/* Logo */}
+					<img
+						src="/salesbox-logo.png"
+						alt="SalesboxAI"
+						className="h-10 mx-auto mb-6"
+					/>
+
+					{/* Welcome message */}
+					<h1 className="text-2xl font-bold text-[#E755A6] mb-2">Welcome to SalesGenie</h1>
+
+					{/* Loading indicator */}
+					<div className="flex items-center justify-center gap-2 text-[#151047]/60 mt-4">
+						<IconLoader2 className="h-5 w-5 animate-spin" />
+						<span className="text-sm">Loading your account...</span>
+					</div>
+				</div>
+			</div>
+		)
 	}
 
 	return (

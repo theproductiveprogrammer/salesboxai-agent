@@ -1,4 +1,4 @@
-import { createRootRoute, Outlet, useRouterState } from '@tanstack/react-router'
+import { createRootRoute, Outlet, useNavigate, useRouterState } from '@tanstack/react-router'
 // import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 
 import LeftPanel from '@/containers/LeftPanel'
@@ -196,6 +196,7 @@ const LogsLayout = () => {
 
 function RootLayout() {
   const router = useRouterState()
+  const navigate = useNavigate()
   const { isAuthenticated, loadStoredCredentials } = useSalesboxAuth()
   const { fetchSalesbot, clearSalesbot } = useSalesbot()
   const [showLoginDialog, setShowLoginDialog] = useState(false)
@@ -294,6 +295,8 @@ function RootLayout() {
             onSuccess={() => {
               isFirstLoginPrompt.current = false
               setShowSplashScreen(false)
+              // Navigate directly to daily-leads since data is already loaded
+              navigate({ to: '/daily-leads' })
             }}
           />
         ) : (
