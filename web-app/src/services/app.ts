@@ -94,3 +94,20 @@ export const getJanDataFolder = async (): Promise<string | undefined> => {
 export const relocateJanDataFolder = async (path: string) => {
   await window.core?.api?.changeAppDataFolder({ newDataFolder: path })
 }
+
+/**
+ * @description Export logs to a tar.gz file in the Downloads folder.
+ * Returns the path to the exported file.
+ * @returns {Promise<string>} The path to the exported logs file
+ */
+export const exportLogs = async (): Promise<string> => {
+  return await invoke('export_logs')
+}
+
+/**
+ * @description Get the path to the logs folder.
+ * @returns {Promise<string>} The logs folder path
+ */
+export const getLogsPath = async (): Promise<string> => {
+  return await invoke('get_logs_path')
+}

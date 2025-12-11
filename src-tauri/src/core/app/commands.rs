@@ -343,3 +343,62 @@ pub fn clear_salesbox_credentials<R: Runtime>(
     log::info!("Cleared SalesBox credentials from Tauri store");
     Ok(())
 }
+
+/// Get the path to the logs folder for debugging
+#[tauri::command]
+pub fn get_logs_path<R: Runtime>(app_handle: tauri::AppHandle<R>) -> String {
+    let logs_path = get_jan_data_folder_path(app_handle).join("logs");
+    logs_path.to_string_lossy().to_string()
+}
+
+/// Export logs to a zip file and return the path to the zip file.
+/// The zip file is saved to the user's Downloads folder.
+#[tauri::command]
+pub async fn export_logs<R: Runtime>(app_handle: tauri::AppHandle<R>) -> Result<String, String> {
+    use flate2::write::GzEncoder;
+    use flate2::Compression;
+
+    let logs_path = get_jan_data_folder_path(app_handle.clone()).join("logs");
+
+    if !logs_path.exists() {
+        return Err("Logs folder does not exist".to_string());
+    }
+
+    // Get Downloads folder
+    let downloads_path = dirs::download_dir()
+        .ok_or_else(|| "Could not find Downloads folder".to_string())?;
+
+    // Create timestamped filename
+    let timestamp = chrono::Local::now().format("%Y%m%d_%H%M%S");
+    let zip_filename = format!("salesboxai_logs_{}.tar.gz", timestamp);
+    let zip_path = downloads_path.join(&zip_filename);
+
+    // Create tar.gz archive
+    let tar_gz = fs::File::create(&zip_path)
+        .map_err(|e| format!("Failed to create archive file: {}", e))?;
+    let enc = GzEncoder::new(tar_gz, Compression::default());
+    let mut tar = tar::Builder::new(enc);
+
+    // Add all log files to the archive
+    for entry in fs::read_dir(&logs_path)
+        .map_err(|e| format!("Failed to read logs directory: {}", e))?
+    {
+        let entry = entry.map_err(|e| format!("Failed to read directory entry: {}", e))?;
+        let path = entry.path();
+
+        if path.is_file() {
+            let file_name = path.file_name()
+                .and_then(|n| n.to_str())
+                .ok_or_else(|| "Invalid file name".to_string())?;
+
+            tar.append_path_with_name(&path, file_name)
+                .map_err(|e| format!("Failed to add file to archive: {}", e))?;
+        }
+    }
+
+    tar.finish()
+        .map_err(|e| format!("Failed to finalize archive: {}", e))?;
+
+    log::info!("Exported logs to {:?}", zip_path);
+    Ok(zip_path.to_string_lossy().to_string())
+}

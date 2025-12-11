@@ -61,6 +61,8 @@ pub fn run() {
             core::app::commands::sync_salesbox_credentials,
             core::app::commands::get_salesbox_credentials,
             core::app::commands::clear_salesbox_credentials,
+            core::app::commands::get_logs_path,
+            core::app::commands::export_logs,
             // Extension commands
             core::extensions::commands::get_jan_extensions_path,
             core::extensions::commands::install_extensions,

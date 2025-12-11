@@ -6,6 +6,7 @@ version = 3
 name = "SalesboxAIAgent"
 version = "1.0.20"
 dependencies = [
+ "chrono",
  "dirs",
  "env",
  "fix-path-env",

@@ -27,6 +27,7 @@ import {
   factoryReset,
   getJanDataFolder,
   relocateJanDataFolder,
+  exportLogs,
 } from '@/services/app'
 import {
   IconBrandDiscord,
@@ -36,6 +37,7 @@ import {
   IconLogs,
   IconCopy,
   IconCopyCheck,
+  IconDownload,
 } from '@tabler/icons-react'
 import { WebviewWindow } from '@tauri-apps/api/webviewWindow'
 import { windowKey } from '@/constants/windows'
@@ -78,6 +80,7 @@ function General() {
   const [selectedNewPath, setSelectedNewPath] = useState<string | null>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [isCheckingUpdate, setIsCheckingUpdate] = useState(false)
+  const [isExportingLogs, setIsExportingLogs] = useState(false)
 
   useEffect(() => {
     const fetchDataFolder = async () => {
@@ -138,6 +141,21 @@ function General() {
       setTimeout(() => setIsCopied(false), 2000) // Reset after 2 seconds
     } catch (error) {
       console.error('Failed to copy to clipboard:', error)
+    }
+  }
+
+  const handleExportLogs = async () => {
+    setIsExportingLogs(true)
+    try {
+      const exportPath = await exportLogs()
+      toast.success(t('settings:general.logsExported'), {
+        description: exportPath,
+      })
+    } catch (error) {
+      console.error('Failed to export logs:', error)
+      toast.error(t('settings:general.logsExportFailed'))
+    } finally {
+      setIsExportingLogs(false)
     }
   }
 
@@ -386,6 +404,26 @@ function General() {
                           className="text-main-view-fg/50"
                         />
                         <span>{openFileTitle()}</span>
+                      </div>
+                    </Button>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="p-0"
+                      onClick={handleExportLogs}
+                      disabled={isExportingLogs}
+                      title={t('settings:general.exportLogs')}
+                    >
+                      <div className="cursor-pointer flex items-center justify-center rounded-sm hover:bg-main-view-fg/15 bg-main-view-fg/10 transition-all duration-200 ease-in-out px-2 py-1 gap-1">
+                        <IconDownload
+                          size={12}
+                          className="text-main-view-fg/50"
+                        />
+                        <span>
+                          {isExportingLogs
+                            ? t('settings:general.exporting')
+                            : t('settings:general.exportLogs')}
+                        </span>
                       </div>
                     </Button>
                   </div>
