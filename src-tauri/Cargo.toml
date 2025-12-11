@@ -1,6 +1,6 @@
 [package]
 name = "SalesGenie"
-version = "1.0.21"
+version = "1.0.22"
 description = "SalesGenie - Your SalesboxAI Assistant"
 authors = ["SalesboxAI <service@salesbox.ai>"]
 license = "MIT"
