@@ -107,7 +107,7 @@ jobs:
           # Change app name for beta and nightly builds
           if [ "${{ inputs.channel }}" != "stable" ]; then
             # Update Cargo.toml for non-stable builds
-            ctoml ./src-tauri/Cargo.toml package.name "SalesboxAIAgent-${{ inputs.channel }}"
+            ctoml ./src-tauri/Cargo.toml package.name "SalesGenie-${{ inputs.channel }}"
             ctoml ./src-tauri/Cargo.toml dependencies.tauri.features[] "devtools"
             echo "------------------"
             cat ./src-tauri/Cargo.toml
@@ -134,11 +134,11 @@ jobs:
         run: |
           cd ./src-tauri/target/release/bundle/nsis
           if [ "${{ inputs.channel }}" != "stable" ]; then
-            FILE_NAME=SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe
-            WIN_SIG=$(cat SalesboxAIAgent-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
+            FILE_NAME=SalesGenie-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe
+            WIN_SIG=$(cat SalesGenie-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
           else
-            FILE_NAME=SalesboxAIAgent_${{ inputs.new_version }}_x64-setup.exe
-            WIN_SIG=$(cat SalesboxAIAgent_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
+            FILE_NAME=SalsGenie_${{ inputs.new_version }}_x64-setup.exe
+            WIN_SIG=$(cat SalesGenie_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
           fi
 
           echo "::set-output name=WIN_SIG::$WIN_SIG"
