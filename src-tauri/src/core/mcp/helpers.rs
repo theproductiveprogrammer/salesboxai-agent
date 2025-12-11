@@ -27,6 +27,47 @@ use crate::core::{
 };
 use jan_utils::can_override_npx;
 
+/// Pre-cache tools for a server immediately after connection.
+/// This ensures the tool cache is populated before any tool calls are made.
+pub async fn precache_server_tools<R: Runtime>(
+    app: &AppHandle<R>,
+    server_name: &str,
+) {
+    let app_state = app.state::<AppState>();
+
+    // Check if server exists
+    {
+        let servers = app_state.mcp_servers.lock().await;
+        if !servers.contains_key(server_name) {
+            log::warn!("Cannot precache tools: server {} not found in map", server_name);
+            return;
+        }
+    }
+
+    // Fetch tools from the server
+    let tools = {
+        let servers = app_state.mcp_servers.lock().await;
+        if let Some(service) = servers.get(server_name) {
+            match service.list_all_tools().await {
+                Ok(tools) => Some(tools),
+                Err(e) => {
+                    log::warn!("Failed to precache tools for server {}: {}", server_name, e);
+                    None
+                }
+            }
+        } else {
+            None
+        }
+    };
+
+    // Cache the tools if we got them
+    if let Some(tools) = tools {
+        let mut cache = app_state.mcp_tool_cache.lock().await;
+        log::info!("Pre-cached {} tools for server {}", tools.len(), server_name);
+        cache.insert(server_name.to_string(), tools);
+    }
+}
+
 /// Calculate exponential backoff delay with jitter
 ///
 /// # Arguments
@@ -547,6 +588,9 @@ async fn schedule_mcp_start_task<R: Runtime>(
                     connected.insert(name.clone(), true);
                     log::info!("Marked MCP server {} as successfully connected", name);
                 }
+
+                // Pre-cache tools immediately after connection
+                precache_server_tools(&app, &name).await;
             }
             Err(e) => {
                 log::error!("Failed to connect to server: {}", e);
@@ -619,6 +663,9 @@ async fn schedule_mcp_start_task<R: Runtime>(
                     connected.insert(name.clone(), true);
                     log::info!("Marked MCP server {} as successfully connected", name);
                 }
+
+                // Pre-cache tools immediately after connection
+                precache_server_tools(&app, &name).await;
             }
             Err(e) => {
                 log::error!("Failed to connect to server: {}", e);
@@ -728,6 +775,9 @@ async fn schedule_mcp_start_task<R: Runtime>(
             connected.insert(name.clone(), true);
             log::info!("Marked MCP server {} as successfully connected", name);
         }
+
+        // Pre-cache tools immediately after connection
+        precache_server_tools(&app, &name).await;
     }
     Ok(())
 }

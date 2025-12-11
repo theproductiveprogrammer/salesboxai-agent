@@ -463,6 +463,49 @@ fn get_http_fallback_endpoint(tool_name: &str) -> Option<&'static str> {
     }
 }
 
+/// Transforms MCP tool arguments to the REST API format expected by salesboxai-core.
+/// MCP tools use camelCase args like `linkedinUrl`, but REST endpoints expect
+/// ChatCtxDTO format with `agentContext.lead_linkedin` etc.
+fn transform_mcp_args_to_rest(tool_name: &str, args: &Option<Map<String, Value>>) -> Value {
+    let args = match args {
+        Some(a) => a,
+        None => return serde_json::json!({}),
+    };
+
+    match tool_name {
+        // Tools that expect ChatCtxDTO with agentContext
+        "get_lead_info" | "prospect_lead" => {
+            let mut agent_context = serde_json::Map::new();
+
+            // Map MCP arg names to agentContext field names
+            if let Some(v) = args.get("linkedinUrl") {
+                agent_context.insert("lead_linkedin".to_string(), v.clone());
+            }
+            if let Some(v) = args.get("leadId") {
+                agent_context.insert("lead_id".to_string(), v.clone());
+            }
+            if let Some(v) = args.get("leadName") {
+                agent_context.insert("lead_name".to_string(), v.clone());
+            }
+            if let Some(v) = args.get("leadEmail") {
+                agent_context.insert("lead_email".to_string(), v.clone());
+            }
+            if let Some(v) = args.get("leadTitle") {
+                agent_context.insert("lead_title".to_string(), v.clone());
+            }
+            if let Some(v) = args.get("leadCompany") {
+                agent_context.insert("lead_company".to_string(), v.clone());
+            }
+
+            serde_json::json!({
+                "agentContext": agent_context
+            })
+        }
+        // Tools that can pass args directly (already match REST format)
+        _ => Value::Object(args.clone()),
+    }
+}
+
 /// Attempts to call a tool via direct HTTP REST API as a fallback when MCP fails.
 /// This ensures tools remain available even when MCP connection is unstable.
 async fn http_fallback_tool_call(
@@ -501,9 +544,9 @@ async fn http_fallback_tool_call(
 
     log::info!("HTTP fallback: calling {} for tool {}", full_url, tool_name);
 
-    // Build request body from arguments
-    let body = arguments.clone().map(|args| serde_json::Value::Object(args))
-        .unwrap_or(serde_json::Value::Object(Map::new()));
+    // Transform MCP arguments to REST API format
+    let body = transform_mcp_args_to_rest(tool_name, arguments);
+    log::debug!("HTTP fallback body: {:?}", body);
 
     // Make HTTP POST request
     let client = reqwest::Client::new();
