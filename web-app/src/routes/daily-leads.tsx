@@ -178,7 +178,7 @@ function DailyLeadsPage() {
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-5 border-b border-main-view-fg/10">
         <div>
-          <h1 className="text-2xl font-bold text-main-view-fg">Daily Leads</h1>
+          <h1 className="text-2xl font-bold text-main-view-fg">Recommended Leads</h1>
           <p className="text-main-view-fg/50 text-sm">
             {leads.length} leads remaining today
           </p>
@@ -200,7 +200,7 @@ function DailyLeadsPage() {
         {showLoading ? (
           <div className="flex items-center justify-center h-48">
             <IconLoader2 className="h-8 w-8 animate-spin text-primary" />
-            <span className="ml-3 text-main-view-fg/60">Loading daily leads...</span>
+            <span className="ml-3 text-main-view-fg/60">Loading recommended leads...</span>
           </div>
         ) : leads.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-48 text-main-view-fg/50">

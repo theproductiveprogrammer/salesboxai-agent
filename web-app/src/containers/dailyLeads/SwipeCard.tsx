@@ -81,7 +81,7 @@ function EmptyState() {
         <div className="text-5xl mb-4">🎉</div>
         <h3 className="text-xl font-bold text-main-view-fg mb-2">All done for today!</h3>
         <p className="text-main-view-fg/60 mb-6">
-          You've reviewed all your daily leads. Check back tomorrow for fresh prospects.
+          You've reviewed all your recommended leads. Check back tomorrow for fresh prospects.
         </p>
         <Button
           variant="outline"
