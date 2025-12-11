@@ -98,6 +98,12 @@ async function main() {
   } catch (err) {
     // Expect EEXIST error if the directory already exists
   }
+  // Ensure binDir exists (it may be deleted by clean or not exist on fresh checkout)
+  try {
+    mkdirSync(binDir, { recursive: true })
+  } catch (err) {
+    // Expect EEXIST error if the directory already exists
+  }
 
   // Adjust these URLs based on latest releases
   const bunVersion = '1.2.10' // Example Bun version
@@ -120,11 +126,14 @@ async function main() {
       path.join(tempBinDir, `bun-${bunPlatform}`, 'bun'),
       path.join(binDir)
     )
-    fs.chmod(path.join(binDir, 'bun'), 0o755, (err) => {
-      if (err) {
-        console.log('Add execution permission failed!', err)
-      }
-    });
+    // Only chmod on non-Windows platforms
+    if (platform !== 'win32') {
+      fs.chmod(path.join(binDir, 'bun'), 0o755, (err) => {
+        if (err) {
+          console.log('Add execution permission failed!', err)
+        }
+      });
+    }
     if (platform === 'darwin') {
       copyFile(path.join(binDir, 'bun'), path.join(binDir, 'bun-x86_64-apple-darwin'), (err) => {
         if (err) {
@@ -180,11 +189,14 @@ async function main() {
       path.join(tempBinDir, `uv-${uvPlatform}`, 'uv'),
       path.join(binDir)
     )
-    fs.chmod(path.join(binDir, 'uv'), 0o755, (err) => {
-      if (err) {
-        console.log('Add execution permission failed!', err)
-      }
-    });
+    // Only chmod on non-Windows platforms
+    if (platform !== 'win32') {
+      fs.chmod(path.join(binDir, 'uv'), 0o755, (err) => {
+        if (err) {
+          console.log('Add execution permission failed!', err)
+        }
+      });
+    }
     if (platform === 'darwin') {
       copyFile(path.join(binDir, 'uv'), path.join(binDir, 'uv-x86_64-apple-darwin'), (err) => {
         if (err) {
