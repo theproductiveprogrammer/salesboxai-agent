@@ -133,16 +133,13 @@ jobs:
         shell: bash
         run: |
           cd ./src-tauri/target/release/bundle/nsis
-          if [ "${{ inputs.channel }}" != "stable" ]; then
-            FILE_NAME=SalesGenie-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe
-            WIN_SIG=$(cat SalesGenie-${{ inputs.channel }}_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
-          else
-            FILE_NAME=SalesGenie_${{ inputs.new_version }}_x64-setup.exe
-            WIN_SIG=$(cat SalesGenie_${{ inputs.new_version }}_x64-setup.exe.sig 2>/dev/null || echo "")
-          fi
+          # Find the actual exe file (filename varies based on productName in tauri.conf.json)
+          FILE_NAME=$(ls -1 *.exe | grep -v '.exe.sig' | head -1)
+          echo "Found installer: $FILE_NAME"
+          WIN_SIG=$(cat "${FILE_NAME}.sig" 2>/dev/null || echo "")
 
-          echo "::set-output name=WIN_SIG::$WIN_SIG"
-          echo "::set-output name=FILE_NAME::$FILE_NAME"
+          echo "FILE_NAME=$FILE_NAME" >> $GITHUB_OUTPUT
+          echo "WIN_SIG=$WIN_SIG" >> $GITHUB_OUTPUT
         id: metadata
 
       ## Upload to s3 for nightly and beta
