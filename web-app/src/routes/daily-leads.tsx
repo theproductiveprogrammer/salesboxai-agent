@@ -206,7 +206,9 @@ function DailyLeadsPage() {
           <div className="flex flex-col items-center justify-center h-48 text-main-view-fg/50">
             <IconUsers className="h-12 w-12 mb-3" />
             <p className="font-medium text-lg">No leads available</p>
-            <p className="text-sm mt-1">Check back tomorrow for new prospects</p>
+            <p className="text-sm mt-1 text-center max-w-md">
+              Get leads assigned to you in SalesboxAI to see them here.
+            </p>
           </div>
         ) : (
           <DailyLeadsView
