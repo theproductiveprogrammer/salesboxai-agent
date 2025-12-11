@@ -268,9 +268,42 @@ const LeftPanel = () => {
 				</div>
 
 				<div className="flex flex-col justify-between overflow-hidden mt-0 !h-[calc(100%-42px)]">
+					{/* Main menu items at top */}
+					<div className="space-y-1 shrink-0 py-1">
+						{mainMenus.map((menu) => {
+							const isActive =
+								(currentPath.includes(route.settings.index) &&
+									menu.route.includes(route.settings.index)) ||
+								(currentPath === route.asyncJobs &&
+									menu.route === route.asyncJobs)
+							return (
+								<Link
+									key={menu.title}
+									to={menu.route}
+									onClick={() => {
+										isSmallScreen && setLeftPanel(false)
+									}}
+									data-test-id={`menu-${menu.title}`}
+									className={cn(
+										'flex items-center gap-1.5 cursor-pointer hover:bg-left-panel-fg/10 py-1 px-1 rounded',
+										isActive
+											? 'bg-left-panel-fg/10'
+											: '[&.active]:bg-left-panel-fg/10'
+									)}
+								>
+									<menu.icon size={18} className="text-left-panel-fg/70" />
+									<span className="font-medium text-left-panel-fg/90">
+										{t(menu.title)}
+									</span>
+								</Link>
+							)
+						})}
+					</div>
+
+					{/* Search and thread list below */}
 					<div
 						className={cn(
-							'flex flex-col',
+							'flex flex-col flex-1 overflow-hidden mt-2',
 							Object.keys(downloads).length > 0 ||
 								localDownloadingModels.size > 0
 								? 'h-[calc(100%-260px)]'
@@ -309,7 +342,7 @@ const LeftPanel = () => {
 								)}
 							</div>
 						)}
-						<div className="flex flex-col w-full overflow-y-auto overflow-x-hidden">
+						<div className="flex flex-col w-full overflow-y-auto overflow-x-hidden flex-1">
 							<div className="h-full w-full overflow-y-auto">
 								{favoritedThreads.length > 0 && (
 									<>
@@ -482,37 +515,6 @@ const LeftPanel = () => {
 								</div>
 							</div>
 						</div>
-					</div>
-
-					<div className="space-y-1 shrink-0 py-1 mt-2">
-						{mainMenus.map((menu) => {
-							const isActive =
-								(currentPath.includes(route.settings.index) &&
-									menu.route.includes(route.settings.index)) ||
-								(currentPath === route.asyncJobs &&
-									menu.route === route.asyncJobs)
-							return (
-								<Link
-									key={menu.title}
-									to={menu.route}
-									onClick={() => {
-										isSmallScreen && setLeftPanel(false)
-									}}
-									data-test-id={`menu-${menu.title}`}
-									className={cn(
-										'flex items-center gap-1.5 cursor-pointer hover:bg-left-panel-fg/10 py-1 px-1 rounded',
-										isActive
-											? 'bg-left-panel-fg/10'
-											: '[&.active]:bg-left-panel-fg/10'
-									)}
-								>
-									<menu.icon size={18} className="text-left-panel-fg/70" />
-									<span className="font-medium text-left-panel-fg/90">
-										{t(menu.title)}
-									</span>
-								</Link>
-							)
-						})}
 						<DownloadManagement />
 					</div>
 				</div>
