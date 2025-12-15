@@ -7,6 +7,7 @@ import { useTranslation } from '@/i18n/react-i18next-compat'
 import { SalesboxAuthStatus } from '@/containers/SalesboxAuthStatus'
 import { SalesboxEndpointInput } from '@/containers/SalesboxEndpointInput'
 import { UnipileAccountIdInput } from '@/containers/UnipileAccountIdInput'
+import { SmtpSettingsInput } from '@/containers/SmtpSettingsInput'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Route = createFileRoute(route.settings.privacy as any)({
@@ -51,6 +52,12 @@ function Privacy() {
                 description="Configure your LinkedIn Account ID for lead information enrichment"
                 align="start"
                 actions={<UnipileAccountIdInput />}
+              />
+              <CardItem
+                title="Email SMTP Settings"
+                description="Configure SMTP server settings for sending emails"
+                column={true}
+                actions={<SmtpSettingsInput />}
               />
             </Card>
           </div>
