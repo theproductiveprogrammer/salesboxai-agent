@@ -26,6 +26,7 @@ import { useSalesboxEndpoint } from '@/hooks/useSalesboxEndpoint'
 import { useSalesboxAuth } from '@/hooks/useSalesboxAuth'
 import { fetch as fetchTauri } from '@tauri-apps/plugin-http'
 import { toast } from 'sonner'
+import { LeadActivityHistory } from './LeadActivityHistory'
 
 interface ProspectingJobWidgetProps {
   job: AsyncJob
@@ -426,6 +427,9 @@ export default function ProspectingJobWidget({
           Analyzing lead and planning outreach...
         </div>
       )}
+
+      {/* Lead Activity History */}
+      <LeadActivityHistory leadId={agentContext?.lead_id} />
 
       {/* Error message */}
       {job.error && (
