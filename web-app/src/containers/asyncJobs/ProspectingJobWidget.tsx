@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { AsyncJob, AsyncJobStatus, ProspectingInput, ProspectingOutput, ProspectingTouch } from '@/types/asyncJobs'
+import {
+  AsyncJob,
+  AsyncJobStatus,
+  ProspectingInput,
+  ProspectingOutput,
+  ProspectingTouch,
+} from '@/types/asyncJobs'
 import { Button } from '@/components/ui/button'
 import {
   MapPin,
@@ -11,7 +17,7 @@ import {
   CheckCircle,
   XCircle,
   Loader2,
-  FastForward
+  FastForward,
 } from 'lucide-react'
 import { useRouter } from '@tanstack/react-router'
 import { route } from '@/constants/routes'
@@ -26,7 +32,9 @@ interface ProspectingJobWidgetProps {
   onAction?: (action: string, job: AsyncJob) => void
 }
 
-export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps) {
+export default function ProspectingJobWidget({
+  job,
+}: ProspectingJobWidgetProps) {
   const router = useRouter()
   const { setPendingContext } = useSBAgentContext()
   const { endpoint } = useSalesboxEndpoint()
@@ -65,8 +73,8 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
           'X-SBAgent-Context': JSON.stringify(agentContext),
         },
         body: JSON.stringify({
-          userMsg: 'Skip wait and continue prospecting'
-        })
+          userMsg: 'Skip wait and continue prospecting',
+        }),
       })
 
       if (response.ok) {
@@ -90,7 +98,9 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
       // Convert username to title case (e.g., "shahul-sk" -> "Shahul Sk")
       return match[1]
         .split('-')
-        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .map(
+          (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+        )
         .join(' ')
     }
     return null
@@ -101,7 +111,9 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
     if (agentContext?.lead_linkedin) return agentContext.lead_linkedin
     // Check if job title contains a LinkedIn URL
     if (job.title && job.title.includes('linkedin.com/in/')) {
-      const match = job.title.match(/(https?:\/\/[^\s\(]+linkedin\.com\/in\/[^\s\(]+)/)
+      const match = job.title.match(
+        /(https?:\/\/[^\s\(]+linkedin\.com\/in\/[^\s\(]+)/
+      )
       return match ? match[1] : null
     }
     return null
@@ -136,11 +148,16 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
   const formatNetworkDistance = (distance?: string): string => {
     if (!distance) return ''
     switch (distance.toUpperCase()) {
-      case 'FIRST_DEGREE': return '1st'
-      case 'SECOND_DEGREE': return '2nd'
-      case 'THIRD_DEGREE': return '3rd'
-      case 'OUT_OF_NETWORK': return 'Out'
-      default: return distance
+      case 'FIRST_DEGREE':
+        return '1st'
+      case 'SECOND_DEGREE':
+        return '2nd'
+      case 'THIRD_DEGREE':
+        return '3rd'
+      case 'OUT_OF_NETWORK':
+        return 'Out'
+      default:
+        return distance
     }
   }
 
@@ -148,9 +165,17 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
   const getTouchTypeInfo = (touchType: string) => {
     switch (touchType.toUpperCase()) {
       case 'LINKEDIN_CONNECT':
-        return { icon: LinkIcon, label: 'LinkedIn Invite', color: 'text-blue-600' }
+        return {
+          icon: LinkIcon,
+          label: 'LinkedIn Invite',
+          color: 'text-blue-600',
+        }
       case 'LINKEDIN_MESSAGE':
-        return { icon: MessageSquare, label: 'LinkedIn Message', color: 'text-blue-600' }
+        return {
+          icon: MessageSquare,
+          label: 'LinkedIn Message',
+          color: 'text-blue-600',
+        }
       case 'EMAIL':
         return { icon: Mail, label: 'Email', color: 'text-green-600' }
       default:
@@ -165,7 +190,7 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
       month: 'short',
       day: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     })
   }
 
@@ -206,7 +231,9 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
           search: { message },
         })
 
-        console.log('Successfully set pending context and navigated to home with message')
+        console.log(
+          'Successfully set pending context and navigated to home with message'
+        )
       } catch (error) {
         console.error('Error navigating to chat:', error)
       }
@@ -221,9 +248,13 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
       <div className="p-5 bg-primary/[0.02] border-b border-border/50">
         <div className="flex items-start gap-4">
           {/* Profile picture or initials */}
-          {(result?.profile?.profile_picture_url || (input as any)?.lead_profile_picture) ? (
+          {result?.profile?.profile_picture_url ||
+          (input as any)?.lead_profile_picture ? (
             <img
-              src={result?.profile?.profile_picture_url || (input as any)?.lead_profile_picture}
+              src={
+                result?.profile?.profile_picture_url ||
+                (input as any)?.lead_profile_picture
+              }
               alt={getLeadDisplayName()}
               className="w-16 h-16 rounded-full object-cover border-2 border-primary/30"
             />
@@ -258,7 +289,8 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
                   </p>
                 )}
                 <div className="flex flex-wrap gap-3 mt-2 text-xs text-main-view-fg/60">
-                  {(result?.profile?.location || agentContext?.lead_company) && (
+                  {(result?.profile?.location ||
+                    agentContext?.lead_company) && (
                     <span className="flex items-center gap-1">
                       <MapPin size={12} />
                       {result?.profile?.location || agentContext?.lead_company}
@@ -294,7 +326,8 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
                       Complete
                     </span>
                   )}
-                  {(job.status === AsyncJobStatus.FAILED || job.status === AsyncJobStatus.ERROR) && (
+                  {(job.status === AsyncJobStatus.FAILED ||
+                    job.status === AsyncJobStatus.ERROR) && (
                     <span className="flex items-center gap-1 text-xs px-2.5 py-1 bg-destructive/10 text-destructive font-medium rounded-full">
                       <XCircle size={12} />
                       Failed
@@ -318,15 +351,6 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
                         {isSkipping ? 'Skipping...' : 'Skip Wait'}
                       </Button>
                     )}
-                    <Button
-                      size="sm"
-                      onClick={handleChatWithLead}
-                      className="flex items-center gap-1 text-xs"
-                      variant="default"
-                    >
-                      <MessageSquare size={14} />
-                      Continue
-                    </Button>
                   </div>
                 )}
               </div>
@@ -348,7 +372,8 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
         <div className="p-5">
           <h4 className="text-sm font-semibold text-main-view-fg mb-3 flex items-center gap-2">
             <Clock size={14} className="text-primary" />
-            Outreach Timeline ({touches.length} {touches.length === 1 ? 'touch' : 'touches'})
+            Outreach Timeline ({touches.length}{' '}
+            {touches.length === 1 ? 'touch' : 'touches'})
           </h4>
           <div className="space-y-3">
             {touches.map((touch: ProspectingTouch, index: number) => {
@@ -368,7 +393,9 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
                         {touchInfo.label}
                       </span>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${getStatusColor(touch.status)}`}>
+                        <span
+                          className={`text-xs px-2 py-0.5 rounded font-medium ${getStatusColor(touch.status)}`}
+                        >
                           {touch.status}
                         </span>
                         <span className="text-xs text-main-view-fg/60">
@@ -392,7 +419,10 @@ export default function ProspectingJobWidget({ job }: ProspectingJobWidgetProps)
       {/* Empty state for no touches */}
       {touches.length === 0 && job.status === AsyncJobStatus.RUNNING && (
         <div className="p-5 text-center text-sm text-main-view-fg/60">
-          <Loader2 size={20} className="animate-spin mx-auto mb-2 text-primary" />
+          <Loader2
+            size={20}
+            className="animate-spin mx-auto mb-2 text-primary"
+          />
           Analyzing lead and planning outreach...
         </div>
       )}
