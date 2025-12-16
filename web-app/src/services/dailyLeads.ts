@@ -38,6 +38,7 @@ interface RawDailyLead {
   industry?: string
   profile?: Record<string, unknown>
   posts?: Array<Record<string, unknown>>
+  engScore?: number
 }
 
 /**
@@ -62,6 +63,9 @@ function mapRawLead(raw: RawDailyLead): DailyLead {
     // Full profile data
     profile: raw.profile as DailyLead['profile'] || null,
     posts: raw.posts as DailyLead['posts'] || null,
+
+    // Engagement score
+    engScore: raw.engScore ?? null,
 
     // Legacy/computed fields
     hasProfile,
