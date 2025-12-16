@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -52,7 +52,7 @@ function ProspectingPage() {
   const [statusFilter, setStatusFilter] = useState<AsyncJobStatus | 'all'>('all')
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(true)
-  const [pollingJobs, setPollingJobs] = useState<Set<string>>(new Set())
+  const pollingJobsRef = useRef<Set<string>>(new Set())
 
   const loadJobs = useCallback(async (reset = false) => {
     if (!endpoint) {
@@ -104,18 +104,14 @@ function ProspectingPage() {
 
   // Polling for running jobs
   const startPolling = useCallback((job: AsyncJob) => {
-    if (!endpoint || pollingJobs.has(job.id)) return
+    if (!endpoint || pollingJobsRef.current.has(job.id)) return
 
     const pollJob = async () => {
       const ageMinutes = getJobAgeMinutes(job.createdAt)
       const interval = getPollingInterval(ageMinutes)
 
       if (!interval) {
-        setPollingJobs(prev => {
-          const next = new Set(prev)
-          next.delete(job.id)
-          return next
-        })
+        pollingJobsRef.current.delete(job.id)
         return
       }
 
@@ -126,32 +122,24 @@ function ProspectingPage() {
         if (updatedJob.status === JobStatus.RUNNING) {
           setTimeout(pollJob, interval)
         } else {
-          setPollingJobs(prev => {
-            const next = new Set(prev)
-            next.delete(job.id)
-            return next
-          })
+          pollingJobsRef.current.delete(job.id)
         }
       } catch (error) {
         console.error('Failed to poll job status:', error)
-        setPollingJobs(prev => {
-          const next = new Set(prev)
-          next.delete(job.id)
-          return next
-        })
+        pollingJobsRef.current.delete(job.id)
       }
     }
 
-    setPollingJobs(prev => new Set(prev).add(job.id))
+    pollingJobsRef.current.add(job.id)
     pollJob()
-  }, [endpoint, pollingJobs])
+  }, [endpoint])
 
   // Start polling for running jobs
   useEffect(() => {
     jobs
-      .filter(job => job.status === JobStatus.RUNNING && !pollingJobs.has(job.id))
+      .filter(job => job.status === JobStatus.RUNNING && !pollingJobsRef.current.has(job.id))
       .forEach(startPolling)
-  }, [jobs, startPolling, pollingJobs])
+  }, [jobs, startPolling])
 
   // Load jobs on mount and when filters change
   useEffect(() => {

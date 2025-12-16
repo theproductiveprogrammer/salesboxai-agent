@@ -4,12 +4,21 @@
  */
 
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
 import {
   IconX,
   IconBrandLinkedin,
+  IconFlame,
 } from '@tabler/icons-react'
 import { openUrl } from '@tauri-apps/plugin-opener'
+import { cn } from '@/lib/utils'
 import type { DailyLead } from '@/types/dailyLeads'
+
+const getScoreStyle = (score: number) => {
+  if (score >= 70) return 'bg-green-500/10 text-green-600 border-green-500/20'
+  if (score >= 40) return 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+  return 'bg-main-view-fg/5 text-main-view-fg/60 border-main-view-fg/10'
+}
 
 interface LeadListItemProps {
   lead: DailyLead
@@ -58,11 +67,18 @@ export default function LeadListItem({
           {titleLine || 'No title info'}
         </p>
 
-        {/* Line 2: Name - Location */}
+        {/* Line 2: Name - Score - Location */}
         <div className="flex items-center gap-2 mt-0.5">
           <span className="text-sm text-main-view-fg truncate">
             {displayName}
           </span>
+          <Badge
+            variant="outline"
+            className={cn('text-xs py-0 px-1.5', getScoreStyle(lead.engScore ?? 0))}
+          >
+            <IconFlame className="h-3 w-3 mr-0.5" />
+            {Math.round(lead.engScore ?? 0)}
+          </Badge>
           {locationLine && (
             <>
               <span className="text-main-view-fg/30">-</span>

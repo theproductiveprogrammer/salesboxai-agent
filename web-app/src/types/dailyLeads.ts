@@ -74,6 +74,9 @@ export interface DailyLead {
   profile: UnipileProfile | null
   posts: UnipilePost[] | null
 
+  // Engagement score (0-100)
+  engScore: number | null
+
   // Legacy profile state (for backwards compatibility)
   hasProfile: boolean // True if we've fetched full profile
   profilePictureUrl: string | null

@@ -16,6 +16,7 @@ import {
   IconLoader2,
   IconBrandLinkedin,
   IconStar,
+  IconFlame,
 } from '@tabler/icons-react'
 import DiscardIcon from '@/assets/icons/discard.svg'
 import ProspectIcon from '@/assets/icons/prospect.svg'
@@ -33,7 +34,10 @@ interface SwipeCardProps {
   loading?: boolean
 }
 
-const getInitials = (firstName?: string | null, lastName?: string | null): string => {
+const getInitials = (
+  firstName?: string | null,
+  lastName?: string | null
+): string => {
   const first = firstName?.charAt(0)?.toUpperCase() || ''
   const last = lastName?.charAt(0)?.toUpperCase() || ''
   return first + last || '?'
@@ -43,6 +47,12 @@ const formatCount = (count?: number | null): string => {
   if (!count) return '0'
   if (count >= 1000) return `${(count / 1000).toFixed(1)}k`
   return count.toString()
+}
+
+const getScoreStyle = (score: number) => {
+  if (score >= 70) return 'bg-green-500/10 text-green-600 border-green-500/20'
+  if (score >= 40) return 'bg-amber-500/10 text-amber-600 border-amber-500/20'
+  return 'bg-main-view-fg/5 text-main-view-fg/60 border-main-view-fg/10'
 }
 
 function SwipeCardSkeleton() {
@@ -80,9 +90,12 @@ function EmptyState() {
     <Card className="overflow-hidden border-main-view-fg/10">
       <CardContent className="p-12 text-center">
         <div className="text-5xl mb-4">🎉</div>
-        <h3 className="text-xl font-bold text-main-view-fg mb-2">All done for today!</h3>
+        <h3 className="text-xl font-bold text-main-view-fg mb-2">
+          All done for today!
+        </h3>
         <p className="text-main-view-fg/60 mb-6">
-          You've reviewed all your recommended leads. Check back tomorrow for fresh prospects.
+          You've reviewed all your recommended leads. Check back tomorrow for
+          fresh prospects.
         </p>
         <Button
           variant="outline"
@@ -121,9 +134,12 @@ export default function SwipeCard({
     : null
 
   // Get display values from profile or fallback to lead data
-  const displayName = profile?.first_name && profile?.last_name
-    ? `${profile.first_name} ${profile.last_name}`
-    : lead.fullName || `${lead.firstName || ''} ${lead.lastName || ''}`.trim() || 'Unknown'
+  const displayName =
+    profile?.first_name && profile?.last_name
+      ? `${profile.first_name} ${profile.last_name}`
+      : lead.fullName ||
+        `${lead.firstName || ''} ${lead.lastName || ''}`.trim() ||
+        'Unknown'
 
   const headline = profile?.headline || lead.title || ''
   const location = profile?.location || lead.location || ''
@@ -135,11 +151,11 @@ export default function SwipeCard({
       {/* Discard button - Left side */}
       <button
         className={cn(
-          "px-6 py-3 rounded-full shrink-0 flex items-center justify-center gap-2",
-          "bg-muted/50 border border-border",
-          "hover:bg-muted hover:scale-105",
-          "active:scale-95 transition-all duration-200",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          'px-6 py-3 rounded-full shrink-0 flex items-center justify-center gap-2',
+          'bg-muted/50 border border-border',
+          'hover:bg-muted hover:scale-105',
+          'active:scale-95 transition-all duration-200',
+          'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
         )}
         onClick={() => onDiscard(lead)}
         disabled={prospecting}
@@ -171,12 +187,18 @@ export default function SwipeCard({
             <Avatar className="h-24 w-24 ring-4 ring-card shrink-0">
               {profile?.profile_picture_url ? (
                 <AvatarImage
-                  src={profile.profile_picture_url_large || profile.profile_picture_url}
+                  src={
+                    profile.profile_picture_url_large ||
+                    profile.profile_picture_url
+                  }
                   alt={displayName}
                 />
               ) : null}
               <AvatarFallback className="bg-primary/10 text-primary font-semibold text-2xl">
-                {getInitials(profile?.first_name || lead.firstName, profile?.last_name || lead.lastName)}
+                {getInitials(
+                  profile?.first_name || lead.firstName,
+                  profile?.last_name || lead.lastName
+                )}
               </AvatarFallback>
             </Avatar>
 
@@ -186,8 +208,18 @@ export default function SwipeCard({
                 <h3 className="font-bold text-main-view-fg text-xl truncate">
                   {displayName}
                 </h3>
+                <Badge
+                  variant="outline"
+                  className={cn('text-xs', getScoreStyle(lead.engScore ?? 0))}
+                >
+                  <IconFlame className="h-3 w-3 mr-1" />
+                  {Math.round(lead.engScore ?? 0)}
+                </Badge>
                 {profile?.is_premium && (
-                  <Badge variant="outline" className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20">
+                  <Badge
+                    variant="outline"
+                    className="text-xs bg-amber-500/10 text-amber-600 border-amber-500/20"
+                  >
                     <IconStar className="h-3 w-3 mr-1" />
                     Premium
                   </Badge>
@@ -208,7 +240,9 @@ export default function SwipeCard({
             {company && (
               <div className="flex items-center gap-1.5">
                 <IconBriefcase className="h-4 w-4 shrink-0" />
-                <span className="truncate">{position ? `${position} at ${company}` : company}</span>
+                <span className="truncate">
+                  {position ? `${position} at ${company}` : company}
+                </span>
               </div>
             )}
             {location && (
@@ -224,12 +258,16 @@ export default function SwipeCard({
             <div className="flex gap-6 mt-4 text-sm">
               <div className="flex items-center gap-1.5 text-main-view-fg/70">
                 <IconUsers className="h-4 w-4" />
-                <span className="font-medium">{formatCount(profile?.connections_count)}</span>
+                <span className="font-medium">
+                  {formatCount(profile?.connections_count)}
+                </span>
                 <span className="text-main-view-fg/50">connections</span>
               </div>
               <div className="flex items-center gap-1.5 text-main-view-fg/70">
                 <IconUserPlus className="h-4 w-4" />
-                <span className="font-medium">{formatCount(profile?.follower_count)}</span>
+                <span className="font-medium">
+                  {formatCount(profile?.follower_count)}
+                </span>
                 <span className="text-main-view-fg/50">followers</span>
               </div>
             </div>
@@ -265,11 +303,11 @@ export default function SwipeCard({
       {/* Prospect button - Right side */}
       <button
         className={cn(
-          "px-6 py-3 rounded-full shrink-0 flex items-center justify-center gap-2",
-          "bg-muted/50 border border-border",
-          "hover:bg-muted hover:scale-105",
-          "active:scale-95 transition-all duration-200",
-          "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+          'px-6 py-3 rounded-full shrink-0 flex items-center justify-center gap-2',
+          'bg-muted/50 border border-border',
+          'hover:bg-muted hover:scale-105',
+          'active:scale-95 transition-all duration-200',
+          'disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100'
         )}
         onClick={() => onProspect(lead)}
         disabled={prospecting}
