@@ -23,6 +23,7 @@ import { cn } from '@/lib/utils'
 import { openUrl } from '@tauri-apps/plugin-opener'
 import { useNavigate } from '@tanstack/react-router'
 import type { DailyLead } from '@/types/dailyLeads'
+import { LeadActivityHistory } from '@/containers/asyncJobs/LeadActivityHistory'
 
 interface SwipeCardProps {
   lead: DailyLead | null
@@ -255,6 +256,9 @@ export default function SwipeCard({
               </Button>
             </div>
           )}
+
+          {/* Activity History */}
+          <LeadActivityHistory leadId={lead.leadId} />
         </CardContent>
       </Card>
 
