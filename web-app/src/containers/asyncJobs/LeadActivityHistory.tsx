@@ -66,7 +66,7 @@ export function LeadActivityHistory({ leadId }: LeadActivityHistoryProps) {
       >
         <span className="flex items-center gap-2">
           <Calendar size={14} className="text-primary" />
-          Activity History
+          Lead Context
           {data?.engagementMetrics && data.engagementMetrics.totalActivities > 0 && (
             <span className="text-xs px-1.5 py-0.5 bg-primary/10 text-primary rounded">
               {data.engagementMetrics.totalActivities}
