@@ -69,6 +69,7 @@ export interface LeadActivityHistory {
   conversationSummary: ConversationSummary | null
   engagementMetrics: EngagementMetrics | null
   error: string | null
+  formattedSummary: string | null // Pre-formatted text summary (same as LLM sees)
 }
 
 export interface LeadActivityHistoryRequest {
