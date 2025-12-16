@@ -19,9 +19,6 @@ import {
   Loader2,
   FastForward,
 } from 'lucide-react'
-import { useRouter } from '@tanstack/react-router'
-import { route } from '@/constants/routes'
-import { useSBAgentContext } from '@/hooks/useSBAgentContext'
 import { useSalesboxEndpoint } from '@/hooks/useSalesboxEndpoint'
 import { useSalesboxAuth } from '@/hooks/useSalesboxAuth'
 import { fetch as fetchTauri } from '@tauri-apps/plugin-http'
@@ -36,8 +33,6 @@ interface ProspectingJobWidgetProps {
 export default function ProspectingJobWidget({
   job,
 }: ProspectingJobWidgetProps) {
-  const router = useRouter()
-  const { setPendingContext } = useSBAgentContext()
   const { endpoint } = useSalesboxEndpoint()
   const [isSkipping, setIsSkipping] = useState(false)
 
@@ -208,6 +203,7 @@ export default function ProspectingJobWidget({
   }
 
   // Handler to navigate to chat with lead context
+  /*
   const handleChatWithLead = async () => {
     if (agentContext) {
       try {
@@ -240,6 +236,7 @@ export default function ProspectingJobWidget({
       }
     }
   }
+  */
 
   const touches = result?.touches || []
 
