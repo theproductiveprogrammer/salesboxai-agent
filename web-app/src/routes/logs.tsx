@@ -79,7 +79,7 @@ function LogsViewer() {
       <HeaderPage>
         <div className="flex items-center flex-1 px-2 py-3">
           <h1 className="text-xl font-bold text-main-view-fg">
-            {t('logs:title', 'Application Logs')}
+            {t('logs:title', { defaultValue: 'Application Logs' })}
           </h1>
         </div>
       </HeaderPage>
