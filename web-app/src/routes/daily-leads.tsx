@@ -12,6 +12,7 @@ import {
   IconLoader2,
   IconUsers,
 } from '@tabler/icons-react'
+import HeaderPage from '@/containers/HeaderPage'
 import { toast } from 'sonner'
 import { useDailyLeadsCache } from '@/hooks/useDailyLeadsCache'
 import { fetchLeadProfile, prospectLead, removeDailyLead } from '@/services/dailyLeads'
@@ -176,24 +177,26 @@ function DailyLeadsPage() {
   return (
     <div className="h-full flex flex-col bg-main-view">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-main-view-fg/10">
-        <div>
-          <h1 className="text-2xl font-bold text-main-view-fg">Recommended Leads</h1>
-          <p className="text-main-view-fg/50 text-sm">
-            {leads.length} leads remaining today
-          </p>
+      <HeaderPage>
+        <div className="flex items-center justify-between flex-1 px-2 py-3">
+          <div>
+            <h1 className="text-xl font-bold text-main-view-fg">Recommended Leads</h1>
+            <p className="text-main-view-fg/50 text-sm">
+              {leads.length} leads remaining today
+            </p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={refreshData}
+            disabled={refreshing}
+            className="gap-2"
+          >
+            <IconRefresh className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
         </div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={refreshData}
-          disabled={refreshing}
-          className="gap-2"
-        >
-          <IconRefresh className={`h-4 w-4 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
-      </div>
+      </HeaderPage>
 
       {/* Main Content */}
       <div className="flex-1 overflow-auto px-6 py-6">

@@ -12,6 +12,7 @@ import {
   IconCircle,
   IconX,
 } from '@tabler/icons-react'
+import HeaderPage from '@/containers/HeaderPage'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { useSalesboxEndpoint } from '@/hooks/useSalesboxEndpoint'
@@ -181,16 +182,16 @@ function ProspectingPage() {
   return (
     <div className="h-full flex flex-col bg-main-view">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-border/50 bg-gradient-to-b from-main-view to-transparent">
-        <div>
-          <h1 className="text-2xl font-bold text-main-view-fg">Prospecting</h1>
-          <p className="text-main-view-fg/70 text-sm">
-            Monitor your lead prospecting campaigns
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
+      <HeaderPage>
+        <div className="flex items-center justify-between flex-1 px-2 py-3">
+          <div>
+            <h1 className="text-xl font-bold text-main-view-fg">Prospecting</h1>
+            <p className="text-main-view-fg/50 text-sm">
+              Monitor your lead prospecting campaigns
+            </p>
+          </div>
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             onClick={refreshJobs}
             disabled={refreshing}
@@ -200,7 +201,7 @@ function ProspectingPage() {
             Refresh
           </Button>
         </div>
-      </div>
+      </HeaderPage>
 
       {/* Search */}
       <div className="px-6 py-4 border-b border-border/50">

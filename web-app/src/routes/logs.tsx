@@ -4,6 +4,7 @@ import { route } from '@/constants/routes'
 import { useEffect, useState, useRef } from 'react'
 import { readLogs } from '@/services/app'
 import { useTranslation } from '@/i18n/react-i18next-compat'
+import HeaderPage from '@/containers/HeaderPage'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const Route = createFileRoute(route.appLogs as any)({
@@ -74,6 +75,15 @@ function LogsViewer() {
 
   return (
     <div className="flex flex-col h-full bg-main-view">
+      {/* Header */}
+      <HeaderPage>
+        <div className="flex items-center flex-1 px-2 py-3">
+          <h1 className="text-xl font-bold text-main-view-fg">
+            {t('logs:title', 'Application Logs')}
+          </h1>
+        </div>
+      </HeaderPage>
+
       <div className="flex-1 overflow-auto" ref={logsContainerRef}>
         <div className="font-mono p-2">
           {logs.length === 0 ? (

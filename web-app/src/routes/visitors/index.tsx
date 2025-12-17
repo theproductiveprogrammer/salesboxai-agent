@@ -8,6 +8,7 @@ import {
   IconUser,
   IconCheck,
 } from '@tabler/icons-react'
+import HeaderPage from '@/containers/HeaderPage'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { RenderMarkdown } from '@/containers/RenderMarkdown'
@@ -106,18 +107,18 @@ function VisitorsPage() {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden bg-main-view">
       {/* Header */}
-      <div className="flex-none px-6 py-5 border-b border-border/50 bg-gradient-to-b from-main-view to-transparent">
-        <div className="flex items-center justify-between">
+      <HeaderPage>
+        <div className="flex items-center justify-between flex-1 px-2 py-3">
           <div>
-            <h1 className="text-2xl font-bold text-main-view-fg">Visitors</h1>
-            <p className="text-main-view-fg/70 text-sm">
+            <h1 className="text-xl font-bold text-main-view-fg">Visitors</h1>
+            <p className="text-main-view-fg/50 text-sm">
               Website visitors identified by your AI agent
             </p>
           </div>
           <Button
-            variant="default"
+            variant="outline"
             size="sm"
             onClick={handleRefresh}
             disabled={loading}
@@ -129,7 +130,7 @@ function VisitorsPage() {
             Refresh
           </Button>
         </div>
-      </div>
+      </HeaderPage>
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto px-6 py-6 bg-main-view">

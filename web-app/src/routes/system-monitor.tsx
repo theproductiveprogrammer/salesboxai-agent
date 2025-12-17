@@ -6,6 +6,7 @@ import { Progress } from '@/components/ui/progress'
 import { route } from '@/constants/routes'
 import { formatMegaBytes } from '@/lib/utils'
 import { IconDeviceDesktopAnalytics } from '@tabler/icons-react'
+import HeaderPage from '@/containers/HeaderPage'
 import { useTranslation } from '@/i18n/react-i18next-compat'
 import { toNumber } from '@/utils/number'
 import { useLlamacppDevices } from '@/hooks/useLlamacppDevices'
@@ -46,15 +47,19 @@ function SystemMonitor() {
     toNumber(systemUsage.used_memory / hardwareData.total_memory) * 100
 
   return (
-    <div className="flex flex-col h-full bg-main-view overflow-y-auto p-6">
-      <div className="flex items-center mb-4 gap-2">
-        <IconDeviceDesktopAnalytics className="text-main-view-fg/80 size-6" />
-        <h1 className="text-xl font-bold text-main-view-fg">
-          {t('system-monitor:title')}
-        </h1>
-      </div>
+    <div className="flex flex-col h-full bg-main-view">
+      {/* Header */}
+      <HeaderPage>
+        <div className="flex items-center flex-1 px-2 py-3 gap-2">
+          <IconDeviceDesktopAnalytics className="text-main-view-fg/80 size-5" />
+          <h1 className="text-xl font-bold text-main-view-fg">
+            {t('system-monitor:title')}
+          </h1>
+        </div>
+      </HeaderPage>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* CPU Usage Card */}
         <div className="bg-main-view-fg/2 rounded-lg p-6 shadow-sm">
           <h2 className="text-base font-semibold text-main-view-fg mb-4">
@@ -189,6 +194,7 @@ function SystemMonitor() {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   )
