@@ -117,7 +117,7 @@ function ProspectingPage() {
       }
 
       try {
-        const updatedJob = await getJobStatus(endpoint, job.id)
+        const updatedJob = await getJobStatus(job.id, endpoint)
         setJobs(prev => prev.map(j => j.id === job.id ? { ...j, ...updatedJob } : j))
 
         if (updatedJob.status === JobStatus.RUNNING) {
