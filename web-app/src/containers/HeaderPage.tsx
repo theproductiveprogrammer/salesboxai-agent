@@ -12,7 +12,7 @@ const HeaderPage = ({ children }: HeaderPageProps) => {
   return (
     <div
       className={cn(
-        'h-10 pl-18 text-main-view-fg flex items-center shrink-0 border-b border-border/10 bg-gradient-to-r from-primary/[0.06] via-accent/[0.05] to-primary/[0.06]',
+        'min-h-12 py-2 pl-18 text-main-view-fg flex items-center shrink-0 border-b border-border/10 bg-gradient-to-r from-primary/[0.06] via-accent/[0.05] to-primary/[0.06]',
         IS_MACOS && !open ? 'pl-18' : 'pl-4',
         children === undefined && 'border-none'
       )}

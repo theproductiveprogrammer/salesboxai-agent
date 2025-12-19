@@ -110,8 +110,8 @@ function VisitorsPage() {
     <div className="flex flex-col h-full overflow-hidden bg-main-view">
       {/* Header */}
       <HeaderPage>
-        <div className="flex items-center justify-between flex-1 px-2 py-3">
-          <div>
+        <div className="flex items-center justify-between flex-1 px-2">
+          <div className="space-y-0.5">
             <h1 className="text-xl font-bold text-main-view-fg">Visitors</h1>
             <p className="text-main-view-fg/50 text-sm">
               Website visitors identified by your AI agent
