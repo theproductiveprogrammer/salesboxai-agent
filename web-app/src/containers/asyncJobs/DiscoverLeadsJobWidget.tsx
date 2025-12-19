@@ -107,9 +107,9 @@ export const DiscoverLeadsJobWidget: React.FC<AsyncJobWidgetProps> = ({
       // Pre-fill message for the user to edit/submit
       const message = `Please get detailed information about this lead: ${linkedinUrl}`
 
-      // Navigate to home with pre-filled message
+      // Navigate to chat with pre-filled message
       await router.navigate({
-        to: route.home,
+        to: route.chat,
         search: { message },
       })
 

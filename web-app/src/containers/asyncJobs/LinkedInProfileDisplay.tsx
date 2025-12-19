@@ -67,9 +67,9 @@ export function LinkedInProfileDisplay({ result, input }: LinkedInProfileDisplay
       const leadData = formatLeadForPrompt()
       const message = `Please start prospecting: ${leadData}`
 
-      // Navigate to home with pre-filled message
+      // Navigate to chat with pre-filled message
       await router.navigate({
-        to: route.home,
+        to: route.chat,
         search: { message },
       })
 
